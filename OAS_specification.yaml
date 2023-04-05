@@ -1,0 +1,3219 @@
+openapi: 3.0.0
+info:
+  contact:
+    name: SkipPay API
+    email: info@skippay.cz
+    url: www.skippay.cz
+  title: Skip Pay API for partners
+  description: API documentation for Skip Pay partners.
+  version: '1.0'
+servers:
+  - url: 'https://api.partner.mallpay.cz'
+    variables: {}
+paths:
+  /authentication/v1/partner:
+    post:
+      tags:
+        - Security
+      summary: Login partner
+      description: Partner authenticate himself and obtain access token
+      operationId: Loginpartner
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/PartnerLogin'
+                - example:
+                    username: eShop
+                    password: eShopSecretPassword
+            example:
+              username: eShop
+              password: eShopSecretPassword
+        required: true
+      responses:
+        '200':
+          description: Partner acces token issued
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PartnerLoginResult'
+                  - description: Partner access token issued
+                    example:
+                      accessToken: TokenForPartnerTokenForPartnerTokenForPartnerTokenForPartner
+                      expiresIn: 7200
+              example:
+                accessToken: TokenForPartnerTokenForPartnerTokenForPartnerTokenForPartner
+                expiresIn: 7200
+        '400':
+          description: Unable to authenticate partner
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Unable to authenticate partner
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  /financing/v1/applications:
+    post:
+      tags:
+        - Application operations
+      summary: Create application
+      description: |-
+        Elementary flow starts when customer wants to use one of Skip Pay's payment method for financing his purchase made in partner e-shop.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        Use `/financing/v1/applications` resource with properly filled request that contains at least following data
+
+        - Customer information
+          - Name (first name and last name - if possible, otherwise full name)
+          - E-mail
+          - Phone number
+
+        - Order details
+          - Number
+          - Total Price (including VAT)
+          - Total VAT (array of total amounts split by VAT rates)
+          - Order items (array, at least one item is required)
+            - Code
+            - Order item name
+            - Total price (all pieces, including VAT)
+            - Total VAT
+
+        - Additional information necessary for the continuation and completion of the process
+          - Your URL where the customer should be redirected after application approval
+          - Your URL where the customer should be redirected after application rejection
+          - URL of your notification endpoint you want us to send you notifications about particular application updates
+
+        For best customer experience request should contain following data:
+
+        - Customer information
+          - Extra data
+            - Historical count of customer's transactions made in partner's e-shop
+
+        - Order details
+          - Delivery carrier information
+          - Address (type BILLING)
+            - Country
+            - City
+            - Street
+            - Street number
+            - ZIP
+            - Address type
+          - Order items
+            - Image
+
+        - Personal data processing and terms and conditions agreement
+
+        If the request was successfully processed, you receive HTTP status code 201 and *application* object with following important information in the response:
+
+        - Application unique ID
+
+        - Application state
+
+        - Application substate
+
+        - Gateway redirect URL where you should redirect a customer after processing of the response
+
+        - Recurrence ID if you sent `isRecurring=true` in request (for recurring orders)
+
+        If the request was recognized as duplication, you receive HTTP status code 200 and the *application* object created during the first related successful request.
+
+        __Note__: If the optional *agreementTermsAndConditions* field was not sent with the request (or it was sent with a value of `false`), the *application* will be created with *agreementTermsAndConditions* value set to `false`, *state* `PROCESSING` and *stateReason* `PROCESSING_REDIRECT_NEEDED`.
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                    | Explanation                                                                      |
+        | ---         | ---                     | ---                                                                              |
+        | 400         | `INVALID_REQUEST`       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+        | 422         | `UNPROCESSABLE`         | Request was well-formed but was unable to be followed due to semantic errors     |Create new *application* of particular financing type
+      operationId: Createapplication
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+        required: true
+      responses:
+        '200':
+          description: Application data is duplicate. Existing application is returned.
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApplicationResponse'
+                  - description: Application data is duplicate. Existing application is returned.
+        '201':
+          description: Application was created
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApplicationResponse'
+                  - description: Application was created
+        '400':
+          description: There was an error processing request
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: There was an error processing request
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/applications/{applicationId}':
+    get:
+      tags:
+        - Application operations
+      summary: Get application detail
+      description: |-
+        If you need to find out current information about particular *application* - primarily its state and other details - use `/financing/v1/applications/{applicationId}` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        If the request was successfully processed, you receive HTTP status code 200 and *application* object.
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                    | Message                                                                          |
+        | ---         | ---                     | ---                                                                              |
+        | 400         | `INVALID_REQUEST`       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+        | 404         | `APPLICATION_NOT_FOUND` | The requested resource could not be found                                        |
+        | 422         | `UNPROCESSABLE`         | The request was well-formed but was unable to be followed due to semantic errors |Get specific *application* detail by ID
+      operationId: Getapplicationdetail
+      parameters:
+        - name: applicationId
+          in: path
+          description: applicationId
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: 11200a0ee1
+      responses:
+        '200':
+          description: Actual application data
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApplicationResponse'
+                  - description: Actual application data
+        '404':
+          description: Application does not exist
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Application does not exist
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/recurrences/{recurrenceId}/applications':
+    post:
+      tags:
+        - Application operations
+      summary: Create application from recurrence
+      description: |-
+        It allows to create application without customer authorization at Skip Pay gate. It needs the recurrence ID to be received previously. This endpoint doesn't need any data about customer.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | NO        |
+      operationId: Createapplicationfromrecurrence
+      parameters:
+        - name: recurrenceId
+          in: path
+          description: Recurrence ID from first application
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/ApplicationWithoutCustomerRequest'
+        required: true
+      responses:
+        '201':
+          description: Application was created
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApplicationResponse'
+                  - description: Application was created
+        '400':
+          description: There was an error processing request
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: There was an error processing request
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+        '404':
+          description: There is no recurrence
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: There is no recurrence
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+        '422':
+          description: Recurrence could not be used or invalid input data
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Recurrence could not be used or invalid input data
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/recurrences/{recurrenceId}':
+    get:
+      tags:
+        - Application operations
+      summary: Get recurrence
+      description: |-
+        It allows to get recurrence detail. You can check if customer authorized your request and if recurrence is ready to be used.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | NO        |
+      operationId: Getrecurrence
+      parameters:
+        - name: recurrenceId
+          in: path
+          description: recurrenceId
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Actual recurrence data
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RecurrenceObject'
+                  - description: Actual recurrence data
+                    example:
+                      id: abcd1234
+                      state: APPROVING
+              example:
+                id: abcd1234
+                state: APPROVING
+        '404':
+          description: There is no recurrence
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: There is no recurrence
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+    patch:
+      tags:
+        - Application operations
+      summary: Update recurrence
+      description: |-
+        It allows to get recurrence detail. You can check if customer authorized your request and if recurrence is ready to be used.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | NO        |At this moment it allows to change the recurrence state only. It's not neccessary but if you want to be sure that nobody can use the recurrence in the future you can cancel it.
+      operationId: Updaterecurrence
+      parameters:
+        - name: recurrenceId
+          in: path
+          description: recurenceId
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/RecurrenceUpdateRequest'
+                - example:
+                    state: CANCELLED
+            example:
+              state: CANCELLED
+        required: true
+      responses:
+        '200':
+          description: Recurrence was updated
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/RecurrenceObject'
+                  - description: Recurrence was updated
+                    example:
+                      id: abcd1234
+                      state: APPROVING
+              example:
+                id: abcd1234
+                state: APPROVING
+        '404':
+          description: There is no recurrence
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: There is no recurrence
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+        '422':
+          description: Recurrence can not be updated
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Recurrence can not be updated
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/applications/{applicationId}/cancel':
+    put:
+      tags:
+        - Application operations
+      summary: Cancel application
+      description: |-
+        If there is need to completely cancel customer's *order*, it is necessary to cancel respective *application*. For this purpose use `/financing/v1/applications/{applicationId}/cancel` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        | Application state | Availability                                                                                                                                                  |
+        | ---               | ---                                                                                                                                                           |
+        | `REJECTED`        | NO                                                                                                                                                            |
+        | `CANCELLED`       | NO                                                                                                                                                            |
+        | `PROCESSING`      | YES                                                                                                                                                           |
+        | `READY`           | YES *(available only when the Application's order is not marked as sent (via *Mark order items as sent*) or delivered (via *Mark order items as delivered*))  |
+
+        If the request was successfully processed, you receive HTTP status code 200 and object of information about cancelled *order* plus basic information about respective *application* (ID, state, substate).
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                                  | Explanation                                                                                           |
+        | ---         | ---                                   | ---                                                                                                   |
+        | 400         | `INVALID_REQUEST`                     | Request was not well formatted (malformed request syntax, size too large, etc.)                       |
+        | 404         | `OBJECT_NOT_FOUND`                    | The requested resource could not be found                                                             |
+        | 422         | `UNPROCESSABLE`                       | The request was well-formed but was unable to be followed due to semantic errors                      |
+        | 422         | `APPLICATION_REJECTED`                | When you try to cancel `Application` already `REJECTED`, which is not allowed                         |
+        | 422         | `APPLICATION_ALREADY_CANCELLED`       | When you try to cancel `Application` that has been cancelled already                                  |
+        | 422         | `APPLICATION_VALIDATION_IN_PROGRESS`  | When you try to cancel `Application` which undergoes validation                                       |
+        | 422         | `APPLICATION_PAID`                    | When you try to cancel `Application` already paid, which is not allowed                               |
+        | 422         | `NOT_SUPPORTED`                       | The request was well-formed but server was not able to change application state due internal rules    |Cancel *application*.
+      operationId: Cancelapplication
+      parameters:
+        - name: applicationId
+          in: path
+          description: applicationId
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: 11b00a1ef1
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApplicationCancelRequest'
+                - example:
+                    reason: APPLICATION_CANCELLED_BY_CUSTOMER
+            example:
+              reason: APPLICATION_CANCELLED_BY_CUSTOMER
+        required: true
+      responses:
+        '200':
+          description: Application was cancelled
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApplicationResponse'
+                  - description: Application was cancelled
+        '422':
+          description: Application can not be cancelled
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Application can not be cancelled
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/applications/{applicationId}/order':
+    put:
+      tags:
+        - Application operations
+      summary: Change application order
+      description: |-
+        When there's some changes within *order* before delivery (e.g. change in order items that impacts the total price of the *order*, or other billing information), use `/financing/v1/applications/{applicationId}/order` resource in order we can adjust everything properly. `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        | Application state | Availability |
+        | ---               | ---          |
+        | `REJECTED`        | NO           |
+        | `CANCELLED`       | NO           |
+        | `PROCESSING`      | YES          |
+        | `READY`           | YES *        |
+
+        > \* Order items can't be changed when some of them are marked as sent (via Mark order items as sent) or delivered (via Mark order items as delivered)
+
+        Use `/financing/v1/applications/{applicationId}/order` resource with properly filled request that contains (only) changed data (resource allows partial put).
+
+        If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                    | Explanation                                                                     |
+        | ---         | ---                     | ---                                                                             |
+        | 400         | `INVALID_REQUEST`       | Request was not well formatted (malformed request syntax, size too large, etc.) |
+        | 404         | `OBJECT_NOT_FOUND`      | The requested resource could not be found                                       |
+        | 422         | `NOT_SUPPORTED`         | Resource is not supported for given financing type                              |Change *order*. Used to change order items, total amount, billing details etc.
+      operationId: Changeapplicationorder
+      parameters:
+        - name: applicationId
+          in: path
+          description: applicationId
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: 11b00a1ef1
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/ApplicationOrderChangeRequest'
+        required: true
+      responses:
+        '200':
+          description: Order was changed
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OrderExtendedResponse'
+                  - description: '    Order was changed'
+        '422':
+          description: Order can not be changed.
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Order can not be changed.
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/applications/{applicationId}/order/cancel':
+    put:
+      tags:
+        - Application operations
+      summary: Mark order items as cancelled
+      description: |-
+        When some or all order items were cancelled (won't be ever delivered), use `/financing/v1/applications/{applicationId}/order/cancel` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        If you want to cancel some items after marking those items as sent or delivered, use [Mark order items as returned](#reference/application-operations/mark-order-items-as-returned) operation.
+
+        | Application state | Availability |
+        | ---               | ---          |
+        | `PROCESSING`      | NO           |
+        | `REJECTED`        | NO           |
+        | `CANCELLED`       | NO           |
+        | `READY`           | YES          |
+
+        Use `/financing/v1/applications/{applicationId}/order/cancel` resource with an empty request to cancel all order items (the whole *order*) at once.
+
+        If you want to cancel specific order item/s, use `/financing/v1/applications/{applicationId}/order/cancel` resource with properly filled request that contains cancelled order items info. In this case request should contain array of cancelled order items with one or more particular order item identificators (`code`/`EAN`/`name`/`type`) - `code`, `ean`, `name` and `type` is used for identifying order item sent in `Create application`.
+
+        > TIP: Use an empty request if marking last (those not yet not marked) item(s) on order as cancelled.
+
+        > **ATTENTION:** If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
+
+        If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                    | Explanation                                                                      |
+        | ---         | ---                     | ---                                                                              |
+        | 400         | `INVALID_REQUEST`       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+        | 404         | `OBJECT_NOT_FOUND`      | The requested resource could not be found                                        |
+        | 422         | `NOT_SUPPORTED`         | Resource is not supported for given financing type                               |Mark order items as cancelled
+
+        System notification. Some or all of the order items were cancelled. Based on *application* financing type and partner setting, credit note may be issued.
+      operationId: Markorderitemsascancelled
+      parameters:
+        - name: applicationId
+          in: path
+          description: applicationId
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: 11b00a1ef1
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/OrderItemsChangeRequest'
+                - example:
+                    items:
+                      - code: EXC4677-1a
+                        ean: '888462064002'
+                        name: iPhone 6s 32GB SpaceGray
+                        type: PHYSICAL
+                        quantity: 1
+                    totalPrice:
+                      amount: 12590
+                      currency: CZK
+                    totalVat:
+                      - amount: 12590
+                        currency: CZK
+                        vatRate: 15
+            example:
+              items:
+                - code: EXC4677-1a
+                  ean: '888462064002'
+                  name: iPhone 6s 32GB SpaceGray
+                  type: PHYSICAL
+                  quantity: 1
+              totalPrice:
+                amount: 12590
+                currency: CZK
+              totalVat:
+                - amount: 12590
+                  currency: CZK
+                  vatRate: 15
+        required: true
+      responses:
+        '200':
+          description: Some order items or the whole order was cancelled
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OrderExtendedResponse'
+                  - description: '    Some order items or the whole order was cancelled'
+        '422':
+          description: Order items can not be canceled.
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Order items can not be canceled.
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/applications/{applicationId}/order/send':
+    put:
+      tags:
+        - Application operations
+      summary: Mark order items as sent
+      description: |-
+        When some or all order items were shipped to the customer, use `/financing/v1/applications/{applicationId}/order/send` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        | Application state | Availability|
+        | ---               | ---         |
+        | `PROCESSING`      | NO          |
+        | `REJECTED`        | NO          |
+        | `CANCELLED`       | NO          |
+        | `READY`           | YES         |
+
+        Use `/financing/v1/applications/{applicationId}/order/send` resource with an empty request to mark all order items (the whole *order*) as sent at once.
+
+        If you want to mark specific order item/s as sent, use `/financing/v1/applications/{applicationId}/order/send` resource with properly filled request that contains sent order items info. In this case request should contain array of sent order items with one or more particular order item identificators (`code`/`EAN`/`name`/`type`) - `code`, `ean`, `name` and `type` is used for identifying order item sent in `Create application`.
+
+        > TIP: Use an empty request if marking last (those not yet not marked) item(s) on order as sent.
+
+        > **ATTENTION:** If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
+
+        If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                            | Explanation                                                                       |
+        | ---         | ---                             | ---                                                                               |
+        | 400         | `INVALID_REQUEST`               | Request was not well formatted (malformed request syntax, size too large, etc.)   |
+        | 404         | `OBJECT_NOT_FOUND`              | The requested resource could not be found                                         |
+        | 422         | `TOTAL_PRICE_LIMIT_EXCEEDED`    | The total price of all subcontracts exceeded the order total price                |
+        | 422         | `NOT_SUPPORTED`                 | Resource is not supported for given financing type                                |Mark order items as sent
+
+        System notification. Some or all order items were shipped to customer.
+        Based on *application* financing type and partner setting, application payment may be processed.
+      operationId: Markorderitemsassent
+      parameters:
+        - name: applicationId
+          in: path
+          description: applicationId
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: 11b00a1ef1
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/OrderItemsSendRequest'
+        required: true
+      responses:
+        '200':
+          description: Order items or whole order is marked as shipped
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OrderExtendedResponse'
+                  - description: '    Order items or whole order is marked as shipped'
+        '422':
+          description: State change can not be processed
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: '    State change can not be processed'
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/applications/{applicationId}/order/deliver':
+    put:
+      tags:
+        - Application operations
+      summary: Mark order items as delivered
+      description: |-
+        When some or all order items were delivered to the customer, use `/financing/v1/applications/{applicationId}/order/deliver` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        | Application state | Availability |
+        | ---               | ---          |
+        | `PROCESSING`      | NO           |
+        | `REJECTED`        | NO           |
+        | `CANCELLED`       | NO           |
+        | `READY`           | YES          |
+
+        Use `/financing/v1/applications/{applicationId}/order/deliver` resource with an empty request to mark all order items (the whole *order*) as delivered at once.
+
+        If you want to mark specific order item/s as delivered, use `/financing/v1/applications/{applicationId}/order/deliver` resource with properly filled request that contains delivered order items info. In this case request should contain array of delivered order items with one or more particular order item identificators (`code`/`EAN`/`name`/`type`) - `code`, `ean`, `name` and `type` is used for identifying order item sent in `Create application`.
+
+        > TIP: Use an empty request if marking last (those not yet not marked) item(s) on order as delivered.
+
+        > **ATTENTION:** If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
+
+        If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                              | Explanation                                                                       |
+        | ---         | ---                               | ---                                                                               |
+        | 400         | `INVALID_REQUEST`                 | Request was not well formatted (malformed request syntax, size too large, etc.)   |
+        | 404         | `OBJECT_NOT_FOUND`                | The requested resource could not be found                                         |
+        | 422         | `TOTAL_PRICE_LIMIT_EXCEEDED`      | The total price of all subcontracts exceeded the order total price                |
+        | 422         | `NOT_SUPPORTED`                   | Resource is not supported for given financing type                                |Mark order items as delivered.
+
+        System notification. Some or all order items were delivered to customer.
+        Based on *application* financing type and partner setting, application payment may be processed.
+      operationId: Markorderitemsasdelivered
+      parameters:
+        - name: applicationId
+          in: path
+          description: applicationId
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: 11b00a1ef1
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/OrderItemsDeliverRequest'
+        required: true
+      responses:
+        '200':
+          description: Order items or whole order is marked as delivered
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OrderExtendedResponse'
+                  - description: '    Order items or whole order is marked as delivered'
+        '422':
+          description: State change can not be processed
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: '    State change can not be processed'
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/applications/{applicationId}/order/return':
+    put:
+      tags:
+        - Application operations
+      summary: Mark order items as returned
+      description: |-
+        When some or all order items were returned by the customer to you (after delivery), use `/financing/v1/applications/{applicationId}/order/return` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        If you want to cancel some items before marking those items as sent or delivered, use [Mark order items as cancelled](#reference/application-operations/mark-order-items-as-cancelled) operation.
+
+        | Application state | Availability |
+        | ---               | ---          |
+        | `PROCESSING`      | NO           |
+        | `REJECTED`        | NO           |
+        | `CANCELLED`       | NO           |
+        | `READY`           | YES          |
+
+        Use `/financing/v1/applications/{applicationId}/order/return` resource with an empty request to mark all order items (the whole *order*) as returned at once.
+
+        If you want to mark specific order item/s as returned, use `/financing/v1/applications/{applicationId}/order/return` resource with properly filled request that contains returned order items info. In this case request should contain array of returned order items with one or more particular order item identificators (`code`/`EAN`/`name`/`type`) - `code`, `ean`, `name` and `type` is used for identifying order item sent in `Create application`.
+
+        > TIP: Use an empty request if marking last (those not yet not marked) item(s) on order as returned.
+
+        > **ATTENTION:** If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
+
+        If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                    | Explanation                                                                      |
+        | ---         | ---                     | ---                                                                              |
+        | 400         | `INVALID_REQUEST`       | Request was not well formatted (malformed request syntax, size too large, etc.)  |
+        | 404         | `OBJECT_NOT_FOUND`      | The requested resource could not be found                                        |
+        | 422         | `NOT_SUPPORTED`         | Resource is not supported for given financing type                               |Mark order items as returned.
+
+        System notification. Some or all order items were returned by customer back to e-shop.
+        Based on *application* financing type and partner setting, credit note may be issued.
+      operationId: Markorderitemsasreturned
+      parameters:
+        - name: applicationId
+          in: path
+          description: applicationId
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: 11b00a1ef1
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/OrderItemsReturnRequest'
+        required: true
+      responses:
+        '200':
+          description: Order items or whole order is marked as returned
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OrderExtendedResponse'
+                  - description: '    Order items or whole order is marked as returned'
+        '422':
+          description: State change can not be processed
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: '    State change can not be processed'
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/applications/{applicationId}/payments':
+    get:
+      tags:
+        - Application operations
+      summary: Get payments on specific application
+      description: |-
+        Get payments on specific *application*
+
+        List of realized payments from Skip Pay to partner. In case of multiple invoices, list may contain more items.
+
+        feature | supported by resource
+        --- | ---
+        [paging](#header-paging) | yes
+        [sorting](#header-sorting) | no
+        [filtering](#header-filtering) | no
+
+        This resource supports [paging](#header-paging). As a value to `before` and `after` parameters, use `paymentId` attribute.
+
+        Collection is sorted by paymentId attribute.
+      operationId: Getpaymentsonspecificapplication
+      parameters:
+        - name: applicationId
+          in: path
+          description: applicationId
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: 11b00a1ef1
+      responses:
+        '200':
+          description: List of payments. May be empty if no payment was processed yet.
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Getpaymentsonspecificapplicationresponse'
+                  - description: '    List of payments. May be empty if no payment was processed yet.'
+                    example:
+                      data:
+                        - paymentId: 1a12
+                          date: '2017-05-20'
+                          applicationId: 11200a0ee1
+                          value:
+                            amount: 12590
+                            currency: CZK
+                          variableSymbol: '1234567890'
+                          invoice:
+                            fullName: 'Ing. Jan Novák, Csc.'
+                            address:
+                              name: John Doe
+                              country: CZ
+                              city: Prague
+                              streetAddress: Letenská
+                              streetNumber: '22'
+                              zip: 140 00
+                              addressType: PERMANENT
+                            dueDate: '2017-06-20'
+                            accountNumber:
+                              accountNumber: 123-123456789
+                              bankCode: '0100'
+                      pagingInfo:
+                        itemsPerPage: 10
+                        nextPage: transactions?sort=category&limit=10&after=25
+                        prevPage: transactions?sort=category&limit=10&before=25
+              example:
+                data:
+                  - paymentId: 1a12
+                    date: '2017-05-20'
+                    applicationId: 11200a0ee1
+                    value:
+                      amount: 12590
+                      currency: CZK
+                    variableSymbol: '1234567890'
+                    invoice:
+                      fullName: 'Ing. Jan Novák, Csc.'
+                      address:
+                        name: John Doe
+                        country: CZ
+                        city: Prague
+                        streetAddress: Letenská
+                        streetNumber: '22'
+                        zip: 140 00
+                        addressType: PERMANENT
+                      dueDate: '2017-06-20'
+                      accountNumber:
+                        accountNumber: 123-123456789
+                        bankCode: '0100'
+                pagingInfo:
+                  itemsPerPage: 10
+                  nextPage: transactions?sort=category&limit=10&after=25
+                  prevPage: transactions?sort=category&limit=10&before=25
+        '404':
+          description: Application does not exist
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Application does not exist
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  /financing/v1/orders:
+    get:
+      tags:
+        - Application operations
+      summary: Get order
+      description: |-
+        If you need to find out current information about particular *order* - primarily its state (or its order items' states) and other details - use `/financing/v1/orders{?orderNumber,orderVariableSymbol,applicationId}` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation, `{orderNumber}` is your order's number and `{orderVariableSymbol}` is your order's variable symbol.
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        | Application state | Availability |
+        | ---               | ---          |
+        | `PROCESSING`      | YES          |
+        | `REJECTED`        | YES          |
+        | `CANCELLED`       | YES          |
+        | `READY`           | YES          |
+
+        If the request was successfully processed, you receive HTTP status code 200 and object of information about specified *order* plus basic information about respective *application* (ID, state, substate).
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Code                    | Explanation                                                                      |
+        | ---         | ---                     | ---                                                                              |
+        | 404         | `OBJECT_NOT_FOUND`      | The requested resource could not be found                                        |
+        | 422         | `UNPROCESSABLE`         | The request was well-formed but was unable to be followed due to semantic errors |Search for *order* using specified parameters.
+
+        use `/financing/v1/orders` with at least one of following parameter:
+
+        - variable symbol,
+
+        - order number,
+
+        - application number.
+
+        <a name="orders-parameters-restriction"></a>
+      operationId: Getorder
+      parameters:
+        - name: orderNumber
+          in: query
+          description: Order Number
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: orderVariableSymbol
+          in: query
+          description: Order Variable Symbol
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: '1234567890'
+        - name: applicationId
+          in: query
+          description: applicationId
+          style: form
+          explode: true
+          schema:
+            type: string
+            example: 11b00a1ef1
+      responses:
+        '200':
+          description: Order data
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/OrderExtendedResponse'
+                  - description: Order data
+        '404':
+          description: Order not found
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: Order not found
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  /financing/v1/precheck:
+    post:
+      tags:
+        - Precheck operations
+      summary: Precheck
+      description: |-
+        Precheck *application*
+
+        Returns probability of *application's* approval and limits of particular customer, if known to Skip Pay
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        It has to be called with valid access token (see the [Security section](#reference/security)) from your server. If you plan to integrate it in client flow, you should implement REST endpoint bound to your shopping basket session, that will be used as a proxy to call Skip Pay API - **NEVER put access token directly to client side**.
+
+        Possible error codes explanation:
+        | Status code | Code                  | Explanation                                                                     |
+        | ---         | ---                   | ---                                                                             |
+        | 400         | `INVALID_REQUEST`     | Request was not well formatted (malformed request syntax, size too large, etc.) |
+        | 422         | `PERSONAL_ID_INVALID` | PersonalId is not valid                                                         |Returns probability of *application's* approval and limits of particular customer, if known to Skip Pay
+      operationId: Precheck
+      parameters: []
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/PrecheckRequest'
+        required: true
+      responses:
+        '200':
+          description: Probability of approval
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PrecheckResultsResponse'
+                  - description: Probability of approval
+                    example:
+                      id: ''
+                      results:
+                        - type: DEFERRED_PAYMENT
+                          recommendation: false
+                          probabilityOfApproval: 0
+                          code: OK
+                          customerType: UNKNOWN
+                          additionalData: []
+                      limits:
+                        availableLimit:
+                          amount: 12590
+                          currency: CZK
+                        totalLimit:
+                          amount: 12590
+                          currency: CZK
+        '400':
+          description: Error in processing request
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: '    Error in processing request'
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+        '422':
+          description: Error in processing request
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ErrorsResponse'
+                  - description: '    Error in processing request'
+                    example:
+                      errors:
+                        - code: ERR_1000_SOME_ERROR_CODE
+                          message: Some error/validation message description
+                          severity: ERROR
+                          attribute: personalBirthNumber
+                          ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+              example:
+                errors:
+                  - code: ERR_1000_SOME_ERROR_CODE
+                    message: Some error/validation message description
+                    severity: ERROR
+                    attribute: personalBirthNumber
+                    ticketId: 'UAT1:AMS:20160516-091658.450:45e4'
+      deprecated: false
+  '/financing/v1/{application.merchantUrls.notificationEndpoint}':
+    post:
+      tags:
+        - Merchantsite operations
+      summary: Application notification
+      description: |-
+        We use this resource when there is need to let you know about important changes within particular *application*. Namely in following situations:
+
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |
+
+        > IMPORTANT NOTE: This service should be developed and exposed by partner e-shops to allow Skip Pay to asynchronously inform these partners about important changes regarding particular applications.
+
+        | Trigger                                                             | Corresponding Application.stateReason | Expected reaction                                                                        |
+        | ---                                                                 | ---                                   | ---                                                                                      |
+        | Application was rejected                                            | `REJECTED`                            | You should probably cancel respective order and release reserved goods                   |
+        | Application was cancelled                                           | `CANCELLED_NOT_PAID`                  | You should probably cancel respective order and release reserved goods                   |
+        | Order to dispatch (we commit to finance customer's order)           | `READY_TO_SHIP`                       | Dispatch the order to the customer                                                       |
+        | Order dispatched                                                    | `READY_SHIPPED`                       | None - serves as an acknowledgment (partner should know about this change)               |
+        | Order delivered                                                     | `READY_DELIVERED`                     | None - serves as an acknowledgment (partner should know about this change)               |
+        | Application was paid to the partner                                 | `READY_PAID`                          | Financial compensation for the application has been processed - check your bank account  |
+
+        > NOTE: READY_PAID state is set when at least part of the application price was paid to the partner, not necessarily full application price. This also applies to the `Application was paid to the partner` application notification trigger.
+
+        We fill the request with following information:
+
+        - Application unique ID
+
+        - Application state
+
+        - Application substate
+
+        > IMPORTANT: You should always double check the state of Application on `/financing/v1/applications/{applicationId}` resource due to security reasons.
+
+        If notification is not processed due to error or unavailability it is automatically sent again (retried) after 1, 5, 5, 5 a 5 minutes by default (5 tries in total).Notify partner about changes in application.
+      operationId: Applicationnotification
+      parameters:
+        - name: application.merchantUrls.notificationEndpoint
+          in: path
+          description: application.merchantUrls.notificationEndpoint
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ApplicationBaseResponse'
+                - example:
+                    id: 11200a0ee1
+                    state: PROCESSING
+                    stateReason: PROCESSING_REDIRECT_NEEDED
+            example:
+              id: 11200a0ee1
+              state: PROCESSING
+              stateReason: PROCESSING_REDIRECT_NEEDED
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Applicationnotificationresponse'
+                  - example:
+                      status: OK
+              example:
+                status: OK
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+                example: Can not process changes
+              example: Can not process changes
+      deprecated: false
+  '/financing/v1/{application.merchantUrls.paymentEndpoint}':
+    post:
+      tags:
+        - Merchantsite operations
+      summary: Payment notification
+      description: |-
+        | Financing type     | Supported |
+        | ---                | ---       |
+        | `DEFERRED_PAYMENT` | YES       |
+        | `PAY_IN_THREE`     | YES       |Notification about new payment.
+      operationId: Paymentnotification
+      parameters:
+        - name: application.merchantUrls.paymentEndpoint
+          in: path
+          description: application.merchantUrls.paymentEndpoint
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json; charset=utf-8:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Payment'
+                - example:
+                    paymentId: 1a12
+                    date: '2017-05-20'
+                    applicationId: 11200a0ee1
+                    value:
+                      amount: 12590
+                      currency: CZK
+                    variableSymbol: '1234567890'
+                    invoice:
+                      fullName: 'Ing. Jan Novák, Csc.'
+                      address:
+                        name: John Doe
+                        country: CZ
+                        city: Prague
+                        streetAddress: Letenská
+                        streetNumber: '22'
+                        zip: 140 00
+                        addressType: PERMANENT
+                      dueDate: '2017-06-20'
+                      accountNumber:
+                        accountNumber: 123-123456789
+                        bankCode: '0100'
+            example:
+              paymentId: 1a12
+              date: '2017-05-20'
+              applicationId: 11200a0ee1
+              value:
+                amount: 12590
+                currency: CZK
+              variableSymbol: '1234567890'
+              invoice:
+                fullName: 'Ing. Jan Novák, Csc.'
+                address:
+                  name: John Doe
+                  country: CZ
+                  city: Prague
+                  streetAddress: Letenská
+                  streetNumber: '22'
+                  zip: 140 00
+                  addressType: PERMANENT
+                dueDate: '2017-06-20'
+                accountNumber:
+                  accountNumber: 123-123456789
+                  bankCode: '0100'
+        required: true
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Paymentnotificationresponse'
+                  - example:
+                      status: OK
+              example:
+                status: OK
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+                example: Can not process changes
+              example: Can not process changes
+      deprecated: false
+  /v1/health:
+    get:
+      tags:
+        - Health check
+      summary: API health check
+      description: |-
+        If the API back-end services are up and runing, you receive HTTP status code 200 with optional version info.
+
+        In other cases, you may receive errors similar to the following ones:
+        | Status code | Description                                             |
+        | ---         | ---                                                     |
+        | 503         | `Service Unavailable` - there is planned service outage |
+
+        > Note: resource DOES NOT require valid *access_token* in the HTTP header of the requestGet current state of the API
+      operationId: APIhealthcheck
+      parameters:
+        - name: Content-Type
+          in: header
+          description: Content Type
+          required: true
+          style: simple
+          schema:
+            enum:
+              - application/json; charset=utf-8
+            type: string
+            example: application/json; charset=utf-8
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json; charset=utf-8:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/HealthCheckResponse'
+                  - example:
+                      projectVersion: Skip Pay 2.40.0
+              example:
+                projectVersion: Skip Pay 2.40.0
+        '503':
+          description: Service is not available
+          headers: {}
+          content: {}
+      deprecated: false
+components:
+  schemas:
+    AccountNumber:
+      title: AccountNumber
+      required:
+        - accountNumber
+        - bankCode
+      type: object
+      properties:
+        accountNumber:
+          type: string
+          description: 'Account number (IBAN, BIC, etc.).'
+          example: 123-123456789
+        bankCode:
+          type: string
+          description: 'Bank code (SWIFT, etc.).'
+          example: '0100'
+      description: Account number with bank code.
+    Address:
+      title: Address
+      required:
+        - country
+        - city
+        - streetAddress
+        - zip
+        - addressType
+      type: object
+      properties:
+        name:
+          type: string
+          description: (max length 100) Name on address
+          example: John Doe
+        country:
+          type: string
+          description: 'Country. (see [ISO 3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))'
+          example: CZ
+        city:
+          type: string
+          description: (max length 100) City.
+          example: Prague
+        streetAddress:
+          type: string
+          description: (max length 100) Street/city part.
+          example: Letenská
+        streetNumber:
+          type: string
+          description: (max length 50) Street number
+          example: '22'
+        zip:
+          type: string
+          description: (max length 30) Postal code
+          example: 140 00
+        addressType:
+          allOf:
+            - $ref: '#/components/schemas/AddressType'
+            - description: Type of the address. Only some of the types are allowed in each context.
+      description: Address
+    AddressType:
+      title: addressType
+      enum:
+        - PERMANENT
+        - CONTACT
+        - DELIVERY
+        - BILLING
+      type: string
+      description: Type of the address. Only some of the types are allowed in each context.
+    Amount:
+      title: Amount
+      required:
+        - amount
+        - currency
+      type: object
+      properties:
+        amount:
+          type: number
+          description: 'Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)'
+          example: 12590
+        currency:
+          type: string
+          description: 'Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) (only CZK value is allowed)'
+          example: CZK
+      description: Financial amount
+    ApplicationBaseResponse:
+      title: ApplicationBaseResponse
+      required:
+        - id
+        - state
+        - stateReason
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier in Skip Pay
+          example: 11200a0ee1
+        state:
+          allOf:
+            - $ref: '#/components/schemas/ApplicationState'
+            - description: Application state.
+        stateReason:
+          allOf:
+            - $ref: '#/components/schemas/ReasonState'
+            - description: 'Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state'
+              example: PROCESSING_REDIRECT_NEEDED
+      description: Financing application base information
+    ApplicationCancelRequest:
+      title: ApplicationCancelRequest
+      type: object
+      properties:
+        reason:
+          allOf:
+            - $ref: '#/components/schemas/CancelationReason'
+            - description: Reason of cancellation. Considered as `APPLICATION_CANCELLED_OTHER` if not set.
+              example: APPLICATION_CANCELLED_BY_CUSTOMER
+        customReason:
+          type: string
+          description: Specification of `APPLICATION_CANCELLED_OTHER` reason
+      description: Specification of the reason why the application is cancelled.
+    ApplicationRequest:
+      title: ApplicationRequest
+      allOf:
+        - $ref: '#/components/schemas/ApplicationWithoutCustomerRequest'
+        - required:
+            - customer
+          type: object
+          properties:
+            customer:
+              allOf:
+                - $ref: '#/components/schemas/CustomerRequest'
+                - description: Customer data
+            isRecurring:
+              type: boolean
+              description: Ensures recurrence ID in reponse. Default is `false`
+              example: false
+    ApplicationResponse:
+      title: ApplicationResponse
+      allOf:
+        - $ref: '#/components/schemas/ApplicationBaseResponse'
+        - required:
+            - customer
+            - order
+          type: object
+          properties:
+            customer:
+              allOf:
+                - $ref: '#/components/schemas/CustomerResponse'
+                - description: Customer data
+            order:
+              $ref: '#/components/schemas/OrderResponse'
+            type:
+              allOf:
+                - $ref: '#/components/schemas/FinancingType'
+                - description: Financing type
+            agreementTermsAndConditions:
+              type: boolean
+              description: Terms and conditions agreement
+              example: true
+            gatewayRedirectUrl:
+              type: string
+              description: Gateway redirect URL. Redirect user to this URL if state is `PROCESSING` and stateReason is `PROCESSING_REDIRECT_NEEDED`.
+            recurrence:
+              $ref: '#/components/schemas/RecurrenceObject'
+      description: Financing application
+    ApplicationState:
+      title: state
+      enum:
+        - PROCESSING
+        - READY
+        - REJECTED
+        - CANCELLED
+      type: string
+      description: Application state.
+    ApplicationWithoutCustomerRequest:
+      title: ApplicationWithoutCustomerRequest
+      required:
+        - order
+        - merchantUrls
+      type: object
+      properties:
+        order:
+          $ref: '#/components/schemas/OrderRequest'
+        type:
+          allOf:
+            - $ref: '#/components/schemas/FinancingType'
+            - description: Financing type
+        agreementTermsAndConditions:
+          type: boolean
+          description: Terms and conditions agreement
+          example: true
+        precheckIds:
+          type: array
+          items:
+            type: string
+          description: 'Array of all precheck ids related to this application. See [Precheck operation](#reference/precheck-operations/precheck) and it''s response (PrecheckResultsResponse).'
+        merchantUrls:
+          allOf:
+            - $ref: '#/components/schemas/MerchantUrls'
+            - description: |-
+                Collection of URLs used for redirection of a customer back to a partner website or as a notification endpoint.
+                Services that should be developed and exposed by partner e-shops to allow Skip Pay to asynchronously inform these partners about important changes regarding particular applications and orders.
+      description: Financing application request
+    ApplicationOrderChangeRequest:
+      title: ApplicationOrderChangeRequest
+      required:
+        - order
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason of change.
+        order:
+          $ref: '#/components/schemas/OrderChangeRequest'
+      description: Object used to change order information.
+    Applicationnotificationresponse:
+      title: Applicationnotificationresponse
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+      example:
+        status: OK
+    CancelationReason:
+      title: reason
+      enum:
+        - APPLICATION_CANCELLED_CARRIER_CHANGED
+        - APPLICATION_CANCELLED_CART_CONTENT_CHANGED
+        - APPLICATION_CANCELLED_BY_CUSTOMER
+        - APPLICATION_CANCELLED_BY_ERP
+        - APPLICATION_CANCELLED_EXPIRED
+        - APPLICATION_CANCELLED_UNFINISHED
+        - APPLICATION_CANCELLED_BY_ESHOP_RULES
+        - APPLICATION_CANCELLED_OTHER
+      type: string
+      description: Reason of cancellation. Considered as `APPLICATION_CANCELLED_OTHER` if not set.
+      example: APPLICATION_CANCELLED_BY_CUSTOMER
+    CarrierId:
+      title: carrierId
+      enum:
+        - CZ_POST_HAND
+        - CZ_POST_OFFICE
+        - CZ_POST_OTHER
+        - PPL
+        - DPD
+        - GEIS
+        - IN_TIME
+        - TOP_TRANS
+        - GEBRUDER_WEISS
+        - LOCAL_COURIER
+        - TNT
+        - GLS
+        - HDS_COMFORT
+        - HDS_STANDARD
+        - MALL_DEPOSIT
+      type: string
+    Code:
+      title: code
+      enum:
+        - OK
+        - UNKNOWN
+        - NOT_AVAILABLE
+        - ADDITIONAL_DATA_SECURITY
+        - ADDITIONAL_DATA_LIMIT
+        - INSUFFICIENT_LIMIT
+        - INSUFFICIENT_LIMIT_OPPORTUNITY
+        - DETAILS_NOT_MATCHING
+        - MANUAL_VERIFICATION
+      type: string
+      description: Result code.
+      example: OK
+    CustomerBase:
+      title: CustomerBase
+      required:
+        - email
+      type: object
+      properties:
+        titleBefore:
+          type: string
+          description: '(max length 60) Academical degree, in front of the name'
+          example: Ing.
+        titleAfter:
+          type: string
+          description: '(max length 60) Academical degree, behind name'
+          example: CSc.
+        email:
+          type: string
+          description: (max length 254) E-mail address of customer
+          example: john.newborn@country.com
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+          description: Addresses. All types are allowed.
+        tin:
+          type: string
+          description: (max length 20) Tax identification number (ICO)
+          example: '12333321'
+        vatin:
+          type: string
+          description: (max length 20) VAT identification number
+          example: CZ8402154456
+        extraData:
+          $ref: '#/components/schemas/CustomerExtraData'
+      description: Customer data
+    CustomerResponse:
+      title: CustomerResponse
+      allOf:
+        - $ref: '#/components/schemas/CustomerBase'
+        - required:
+            - type
+          type: object
+          properties:
+            firstName:
+              type: string
+              description: (max length 60) Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              example: John
+            lastName:
+              type: string
+              description: (max length 60) Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              example: Newborn
+            fullName:
+              type: string
+              description: '(max length 240) Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
+              example: 'Ing. John Newborn, Csc.'
+            phone:
+              type: string
+              description: (max length 13) Phone number with country code (including leading `+`).
+              example: '+420123456789'
+            type:
+              allOf:
+                - $ref: '#/components/schemas/CustomerType'
+                - description: Customer type.
+      description: Customer data
+    CustomerRequest:
+      title: CustomerRequest
+      allOf:
+        - $ref: '#/components/schemas/CustomerBase'
+        - type: object
+          properties:
+            firstName:
+              type: string
+              description: (max length 60) Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              example: John
+            lastName:
+              type: string
+              description: (max length 60) Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              example: Newborn
+            fullName:
+              type: string
+              description: '(max length 240) Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
+              example: 'Ing. John Newborn, Csc.'
+            phone:
+              type: string
+              description: (max length 13) Phone number with country code (including leading `+`). Phone number is by default required if you are not able to send it contact us.
+              example: '+420123456789'
+      description: Customer data
+    CustomerType:
+      title: Customer Type
+      enum:
+        - UNKNOWN
+        - FIRST_ORDER
+        - FULL
+        - BLOCKED
+      type: string
+      description: Customer type.
+    CustomerExtraData:
+      title: CustomerExtraData
+      type: object
+      properties:
+        transactionsNumber:
+          type: number
+          description: (positive integer) Historical count of customer's cash transactions made in partner's e-shop
+          example: 10
+        cashlessTransactionsNumber:
+          type: number
+          description: (positive integer) Historical count of customer's cashless transactions made in partner's e-shop
+          example: 5
+        transactionsSum:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        cashlessTransactionsSum:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        latestTransactionDate:
+          type: string
+          description: Newest transaction date on partner e-shop.
+          example: '2017-01-10'
+        earliestTransactionDate:
+          type: string
+          description: Oldest transaction date on partner e-shop
+          example: '2015-10-12'
+        pageTotalTime:
+          type: number
+          description: (positive integer) Total time spent on partners website (in seconds)
+          example: 250
+        pageReviewsTime:
+          type: number
+          description: (positive integer) Total time spent on partners website in review and comments sections (in seconds)
+          example: 100
+        cartItemsRemoved:
+          type: number
+          description: (positive integer) Total count of removed items form shopping basket during current shopping
+          example: 2
+        itemsViewed:
+          type: number
+          description: (positive integer) Number of viewed pages with products
+          example: 10
+        tags:
+          type: array
+          items:
+            type: string
+          description: '(array[max length 10]) List of custom tags (ie. information, that customer is club member, vip customer, etc.)'
+    CustomerBase1:
+      title: CustomerBase1
+      required:
+        - email
+      type: object
+      properties:
+        titleBefore:
+          type: string
+          description: '(max length 60) Academical degree, in front of the name'
+          example: Ing.
+        titleAfter:
+          type: string
+          description: '(max length 60) Academical degree, behind name'
+          example: CSc.
+        email:
+          type: string
+          description: (max length 254) E-mail address of customer
+          example: john.newborn@country.com
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrecheckAddress'
+          description: Addresses. All types are allowed.
+        tin:
+          type: string
+          description: (max length 20) Tax identification number (ICO)
+          example: '12333321'
+        vatin:
+          type: string
+          description: (max length 20) VAT identification number
+          example: CZ8402154456
+        extraData:
+          $ref: '#/components/schemas/CustomerExtraData'
+      description: Customer data
+    DeliveryType:
+      title: deliveryType
+      enum:
+        - DELIVERY_CARRIER
+        - PERSONAL_BRANCH
+        - PERSONAL_PARTNER
+        - ONLINE
+      type: string
+      description: 'Delivery type, for `DELIVERY_CARRIER` type can be further specified by `deliveryCarrier` attribute.'
+    DeliveryCarrier:
+      oneOf:
+        - $ref: '#/components/schemas/CarrierId'
+        - type: string
+          example: my custom carrier
+      description: Delivery carrier
+    DocumentType:
+      title: Document Type
+      enum:
+        - INVOICE
+        - PROFORMA_INVOICE
+        - CREDIT_NOTE
+        - OTHER
+      type: string
+      description: Type of the document
+    DocumentRequest:
+      title: DocumentRequest
+      required:
+        - type
+        - file
+      type: object
+      properties:
+        type:
+          allOf:
+            - $ref: '#/components/schemas/DocumentType'
+            - description: Type of the document
+        file:
+          $ref: '#/components/schemas/FileRequest'
+        description:
+          type: string
+          description: File description
+          example: This is an invoice
+        extraData:
+          $ref: '#/components/schemas/DocumentExtraData'
+      description: 'Attached document (e.g. invoice, credit note etc.)'
+    DocumentResponse:
+      title: DocumentResponse
+      required:
+        - type
+        - file
+      type: object
+      properties:
+        type:
+          allOf:
+            - $ref: '#/components/schemas/DocumentType'
+            - description: Type of the document
+        file:
+          $ref: '#/components/schemas/PrivateFileResponse'
+        description:
+          type: string
+          description: File description
+          example: This is an invoice
+        extraData:
+          $ref: '#/components/schemas/DocumentExtraData'
+      description: 'Attached document (e.g. invoice, credit note etc.)'
+    DocumentExtraData:
+      title: DocumentExtraData
+      type: object
+      properties:
+        variableSymbol:
+          type: string
+          description: 'Variable symbol of this document (proforma, invoice, ...)'
+          example: '1234567890'
+    ErrorResponse:
+      title: ErrorResponse
+      required:
+        - code
+        - message
+        - severity
+      type: object
+      properties:
+        code:
+          type: string
+          description: Unique internal error code
+          example: ERR_1000_SOME_ERROR_CODE
+        message:
+          type: string
+          description: Human readable error description (non-localized)
+          example: Some error/validation message description
+        severity:
+          $ref: '#/components/schemas/Severity'
+        attribute:
+          type: string
+          description: JSON path of request attribute that caused the error (if applicable)
+          example: personalBirthNumber
+        ticketId:
+          type: string
+          description: 'Internal ticket ID, used for error backtracking'
+          example: 'UAT1:AMS:20160516-091658.450:45e4'
+    ErrorsResponse:
+      title: ErrorsResponse
+      required:
+        - errors
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorResponse'
+          description: Array with errors
+    FileResponse:
+      title: FileResponse
+      required:
+        - filename
+        - url
+      type: object
+      properties:
+        filename:
+          type: string
+          description: (max length 100) File name.
+          example: invoice.pdf
+        url:
+          type: string
+          description: File URL.
+          example: 'https://www.partner.com/file?id=12345'
+    FinancingType:
+      title: Financing Type
+      enum:
+        - DEFERRED_PAYMENT
+        - PAY_IN_THREE
+      type: string
+      description: Financing type
+      example: PAY_IN_THREE
+    FileRequest:
+      oneOf:
+        - type: string
+          example: RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==
+        - type: string
+          example: 'https://www.partner.com/file?id=12345'
+    FinancingType2:
+      title: Financing Type 2
+      enum:
+        - DEFERRED_PAYMENT
+        - PAY_IN_THREE
+      type: string
+      description: 'Financing type, if type is not sent `DEFERRED_PAYMENT` is selected.'
+    Getpaymentsonspecificapplicationresponse:
+      title: Getpaymentsonspecificapplicationresponse
+      required:
+        - data
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+          description: ''
+        pagingInfo:
+          $ref: '#/components/schemas/PagingInfo'
+    HealthCheckResponse:
+      title: HealthCheckResponse
+      type: object
+      properties:
+        projectVersion:
+          type: string
+          description: Version of the project
+          example: Skip Pay 2.40.0
+      description: Health check response
+    InvoiceInfo:
+      title: InvoiceInfo
+      required:
+        - dueDate
+        - accountNumber
+      type: object
+      properties:
+        fullName:
+          type: string
+          description: 'Customer full name, including academical degrees and salutation (Mr./Mrs./..). Empty if requested via customerDueDateCategory.'
+          example: 'Ing. Jan Novák, Csc.'
+        address:
+          allOf:
+            - $ref: '#/components/schemas/Address'
+            - description: Address
+        dueDate:
+          type: string
+          description: Invoice due date.
+          example: '2017-06-20'
+        accountNumber:
+          allOf:
+            - $ref: '#/components/schemas/AccountNumber'
+            - description: Account number with bank code.
+      description: 'Billing information, to be included in invoice.'
+    ItemType:
+      title: Item Type
+      enum:
+        - PHYSICAL
+        - DISCOUNT
+        - SHIPPING_FEE
+        - SALES_TAX
+        - DIGITAL
+        - GIFT_CARD
+        - STORE_CREDIT
+        - FEE
+        - INSURANCE
+      type: string
+      description: Item type
+    Limits:
+      title: Limits
+      required:
+        - availableLimit
+        - totalLimit
+      type: object
+      properties:
+        availableLimit:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        totalLimit:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+      description: Customer's limits
+    MerchantUrls:
+      title: MerchantUrls
+      required:
+        - approvedRedirect
+        - rejectedRedirect
+        - notificationEndpoint
+      type: object
+      properties:
+        approvedRedirect:
+          type: string
+          description: (max length 512) URL of the partner used for redirection of the customer back to partner website (from Skip Pay gateway) after application approval. Do not implement any business logic on accessing this URL by customer. Implement business logic to READY notification via `notificationEndpoint`.
+          example: 'http://www.yourEshop.com/paymentApproved.html'
+        rejectedRedirect:
+          type: string
+          description: (max length 512) URL of the partner used for redirection of the customer back to partner website (from Skip Pay gateway) after application rejection.  Do not implement any business logic on accessing this URL by customer. Implement business logic to REJECTED notification via `notificationEndpoint`.
+          example: 'http://www.yourEshop.com/paymentRejected.html'
+        notificationEndpoint:
+          type: string
+          description: '(max length 512) URL of the partner used as a notification endpoint for obtaining important updates about application (approval, rejection, storno, etc.).'
+          example: 'http://www.yourEshop.com/notifications'
+        paymentsEndpoint:
+          type: string
+          description: (max length 512) URL of the partner used as a notification endpoint for obtaining information about payments connected with application.
+          example: 'http://www.yourEshop.com/paymentNotification'
+      description: |-
+        Collection of URLs used for redirection of a customer back to a partner website or as a notification endpoint.
+        Services that should be developed and exposed by partner e-shops to allow Skip Pay to asynchronously inform these partners about important changes regarding particular applications and orders.
+    OrderItemsChangeRequest:
+      title: OrderItemsChangeRequest
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemChangeRequest'
+          description: List of changed items. All items are considered when empty.
+        totalPrice:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        totalVat:
+          type: array
+          items:
+            $ref: '#/components/schemas/VatAmount'
+          description: Total VAT amounts of items (from orderItems array) split by their VAT rates.
+      description: Object used to change order items.
+    OrderItemsReturnRequest:
+      title: OrderItemsReturnRequest
+      allOf:
+        - $ref: '#/components/schemas/OrderItemsChangeRequest'
+        - type: object
+          properties:
+            document:
+              allOf:
+                - $ref: '#/components/schemas/DocumentRequest'
+                - description: 'Attached document (e.g. invoice, credit note etc.)'
+            variableSymbol:
+              type: string
+              description: '(max length 10)  Variable symbol of the new document (credit note, ...). This symbols is used by Skip Pay to pair payment from e-shop.'
+              example: '1234567890'
+      description: Object used to mark order items as returned.
+    OrderItemsSendRequest:
+      title: OrderItemsSendRequest
+      allOf:
+        - $ref: '#/components/schemas/OrderItemsChangeRequest'
+        - type: object
+          properties:
+            document:
+              allOf:
+                - $ref: '#/components/schemas/DocumentRequest'
+                - description: 'Attached document (e.g. invoice, credit note etc.)'
+            variableSymbol:
+              type: string
+              description: '(max length 10)  Required if was not specified earlier in ''Create application'' or ''Change application order'' operations. Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
+              example: '1234567890'
+            specificSymbol:
+              type: string
+              description: '(max length 10)  Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
+              example: '1234567890'
+            sentDate:
+              type: string
+              description: Shipping date
+              example: '2017-01-12'
+            deliveryCarrier:
+              allOf:
+                - $ref: '#/components/schemas/DeliveryCarrier'
+                - description: Delivery carrier
+            deliveryTrackingNumber:
+              type: string
+              description: (max length 64) Delivery tracking number
+              example: EEX1221
+      description: Object used to mark order items as sent.
+    OrderItemsDeliverRequest:
+      title: OrderItemsDeliverRequest
+      allOf:
+        - $ref: '#/components/schemas/OrderItemsSendRequest'
+        - type: object
+          properties:
+            deliveryDate:
+              type: string
+              description: Delivery date
+              example: '2017-01-15'
+      description: Object used to mark order items as delivered.
+    OrderBase:
+      title: OrderBase
+      required:
+        - number
+        - totalPrice
+        - totalVat
+      type: object
+      properties:
+        number:
+          type: string
+          description: (max length 100) Order number (internal for e-shop)
+          example: AA234
+        variableSymbols:
+          type: array
+          items:
+            type: string
+          description: '(max length 10) Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+        totalPrice:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        totalVat:
+          type: array
+          items:
+            $ref: '#/components/schemas/VatAmount'
+          description: Total VAT amounts split by their VAT rates.
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+          description: Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+        deliveryType:
+          allOf:
+            - $ref: '#/components/schemas/DeliveryType'
+            - description: 'Delivery type, for `DELIVERY_CARRIER` type can be further specified by `deliveryCarrier` attribute.'
+        deliveryCarrier:
+          allOf:
+            - $ref: '#/components/schemas/DeliveryCarrier'
+            - description: Delivery carrier
+        reservationDate:
+          type: string
+          description: |-
+            Date and time until order is reserved.
+
+            Until 'reservationDate' Skip Pay will try to notify partner with Application notification about approval or rejection.
+
+            After this date and time, e-shop does not guarantee items availability (if application processing is longer, it may endanger order fullfillment).
+          nullable: true
+          example: '2017-07-15T00:00:00+02:00'
+      description: 'Order information, needed to create an application.'
+    OrderRequest:
+      title: OrderRequest
+      allOf:
+        - $ref: '#/components/schemas/OrderBase'
+        - required:
+            - items
+          type: object
+          properties:
+            documents:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentRequest'
+              description: Attached documents (invoices etc.)
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderItemRequest'
+              description: Order items
+            merchantId:
+              type: string
+              description: Merchant identification (ie. in case of multiple e-shops managed by one credentials)
+    OrderResponse:
+      title: OrderResponse
+      allOf:
+        - $ref: '#/components/schemas/OrderBase'
+        - required:
+            - state
+            - items
+            - merchantId
+          type: object
+          properties:
+            state:
+              allOf:
+                - $ref: '#/components/schemas/OrderState'
+                - description: Order state.
+            deliveryDate:
+              type: string
+              description: Date and time of delivery
+              example: '2017-01-17T00:00:00+02:00'
+            deliveryTrackingNumber:
+              type: string
+              description: (max length 64) Delivery tracking number
+              example: EX12221
+            sentDate:
+              type: string
+              description: Date and time of order shipping
+              example: '2017-01-12T00:00:00+02:00'
+            documents:
+              type: array
+              items:
+                $ref: '#/components/schemas/DocumentResponse'
+              description: Attached documents (invoices etc.)
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderItemResponse'
+              description: Order items
+            merchantId:
+              type: string
+              description: Merchant identification
+    OrderExtendedResponse:
+      title: OrderExtendedResponse
+      allOf:
+        - $ref: '#/components/schemas/OrderResponse'
+        - required:
+            - applicationInfo
+          type: object
+          properties:
+            applicationInfo:
+              allOf:
+                - $ref: '#/components/schemas/ApplicationBaseResponse'
+                - description: Financing application base information
+      description: Order with additional information about Application.
+    OrderChangeRequest:
+      title: OrderChangeRequest
+      type: object
+      properties:
+        number:
+          type: string
+          description: Order number (internal for e-shop)
+          example: AA234
+        variableSymbols:
+          type: array
+          items:
+            type: string
+          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+        totalPrice:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        totalVat:
+          type: array
+          items:
+            $ref: '#/components/schemas/VatAmount'
+          description: Total VAT amounts split by their VAT rates
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+          description: Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+        deliveryType:
+          allOf:
+            - $ref: '#/components/schemas/DeliveryType'
+            - description: 'Delivery type, for `DELIVERY_CARRIER` type can be further specified by `deliveryCarrier` attribute.'
+        deliveryCarrier:
+          allOf:
+            - $ref: '#/components/schemas/DeliveryCarrier'
+            - description: Delivery carrier
+        reservationDate:
+          type: string
+          description: |-
+            Date and time until order is reserved.
+
+            Until 'reservationDate' Skip Pay will try to notify partner with Application notification about approval or rejection.
+
+            After this date and time, e-shop does not guarantee items availability (if application processing is longer, it may endanger order fullfillment).
+          nullable: true
+          example: '2017-07-15T00:00:00+02:00'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
+          description: Order items
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentRequest'
+          description: Attached documents (invoices etc.)
+    OrderItemBase:
+      title: OrderItemBase
+      required:
+        - code
+        - name
+        - totalPrice
+        - totalVat
+      type: object
+      properties:
+        code:
+          type: string
+          description: (max length 200) Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          example: EXC4677-1a
+        ean:
+          type: string
+          description: (max length 64) EAN code.
+          example: '888462064002'
+        name:
+          type: string
+          description: (max length 255) Item name
+          example: iPhone 6s 32GB SpaceGray
+        type:
+          allOf:
+            - $ref: '#/components/schemas/ItemType'
+            - description: Item type
+        variant:
+          type: string
+          description: (max length 250) Item variant
+          example: 32GB SpaceGray
+        description:
+          type: string
+          example: Mobile phone with 32GB of RAM
+        producer:
+          type: string
+          description: (max length 250)
+          example: Apple
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of item categories
+        totalPrice:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        totalVat:
+          allOf:
+            - $ref: '#/components/schemas/VatAmount'
+            - description: Financial amount with VAT rate.
+        productUrl:
+          type: string
+          description: (max length 200) URL of the item in e-shop
+          example: 'https://www.example.com?itemId=10'
+      description: 'Order item base information, needed to identify order item'
+    OrderItemRequest:
+      title: OrderItemRequest
+      allOf:
+        - $ref: '#/components/schemas/OrderItemBase'
+        - type: object
+          properties:
+            image:
+              $ref: '#/components/schemas/FileRequest'
+            unitPrice:
+              allOf:
+                - $ref: '#/components/schemas/Amount'
+                - description: Financial amount
+            unitVat:
+              allOf:
+                - $ref: '#/components/schemas/VatAmount'
+                - description: Financial amount with VAT rate.
+            quantity:
+              type: number
+              description: '(positive float/decimal up to 3 decimal places) Item quantity. If empty, considered as 1.'
+              example: 1
+      description: 'Order item information, needed to create an application.'
+    OrderItemResponse:
+      title: OrderItemResponse
+      allOf:
+        - $ref: '#/components/schemas/OrderItemBase'
+        - required:
+            - state
+            - unitPrice
+            - unitVat
+            - quantity
+          type: object
+          properties:
+            state:
+              allOf:
+                - $ref: '#/components/schemas/OrderState'
+                - description: Order state.
+            sentDate:
+              type: string
+              description: Date when item was sent. Only when the whole order was NOT sent at once.
+              example: '2017-01-10'
+            deliveryDate:
+              type: string
+              description: Date when item was delivered. Only when the whole order was NOT sent at once.
+              example: '2017-01-12'
+            deliveryTrackingNumber:
+              type: string
+              description: (max length 64) Tracking number for the item. Only when the whole order was NOT sent at once.
+              example: EX21121
+            image:
+              $ref: '#/components/schemas/FileResponse'
+            unitPrice:
+              allOf:
+                - $ref: '#/components/schemas/Amount'
+                - description: Financial amount
+            unitVat:
+              allOf:
+                - $ref: '#/components/schemas/VatAmount'
+                - description: Financial amount with VAT rate.
+            quantity:
+              type: number
+              description: (positive float/decimal up to 3 decimal places) Item quantity.
+              example: 1
+      description: Order item information.
+    OrderState:
+      title: Order State
+      enum:
+        - PROCESSING
+        - SENT
+        - DELIVERED
+        - RETURNED
+        - CANCELLED
+      type: string
+      description: Order state.
+    OrderItemChangeRequest:
+      title: OrderItemChangeRequest
+      type: object
+      properties:
+        code:
+          type: string
+          description: (max length 200) Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          example: EXC4677-1a
+        ean:
+          type: string
+          description: (max length 64) EAN code.
+          example: '888462064002'
+        name:
+          type: string
+          description: (max length 255) Item name
+          example: iPhone 6s 32GB SpaceGray
+        type:
+          allOf:
+            - $ref: '#/components/schemas/ItemType'
+            - description: Item Type
+              example: PHYSICAL
+        quantity:
+          type: number
+          description: '(positive float/decimal up to 3 decimal places) Item quantity. If empty, considered as whole item quantity is selected'
+          example: 1
+      description: Order item base information
+    Payment:
+      title: Payment
+      required:
+        - paymentId
+        - date
+        - applicationId
+        - value
+      type: object
+      properties:
+        paymentId:
+          type: string
+          description: unique payment identifier
+          example: 1a12
+        date:
+          type: string
+          description: Payment date
+          example: '2017-05-20'
+        applicationId:
+          type: string
+          description: Application ID that this payment belongs to
+          example: 11200a0ee1
+        value:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        variableSymbol:
+          type: string
+          description: Payment variable symbol
+          example: '1234567890'
+        invoice:
+          allOf:
+            - $ref: '#/components/schemas/InvoiceInfo'
+            - description: 'Billing information, to be included in invoice.'
+      description: Payment information
+    PartnerLogin:
+      title: PartnerLogin
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        username:
+          type: string
+          description: Partner username
+          example: eShop
+        password:
+          type: string
+          description: Partner secret password
+          example: eShopSecretPassword
+      description: Partner login credentials
+    PartnerLoginResult:
+      title: PartnerLoginResult
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Access token
+          example: TokenForPartnerTokenForPartnerTokenForPartnerTokenForPartner
+        expiresIn:
+          type: number
+          description: Token validity remaining time (in seconds)
+          example: 7200
+      description: Authenticated partner access token
+    PrivateFileResponse:
+      title: PrivateFileResponse
+      required:
+        - filename
+        - url
+      type: object
+      properties:
+        filename:
+          type: string
+          description: (max length 100) File name.
+          example: invoice.pdf
+        url:
+          type: string
+          description: File URL (URL is accessible only 1 hour from its generation for security reasons)
+          example: 'https://www.partner.com/file?id=12345'
+    PrecheckCustomerRequest:
+      title: PrecheckCustomerRequest
+      allOf:
+        - $ref: '#/components/schemas/CustomerBase1'
+        - required:
+            - phone
+          type: object
+          properties:
+            firstName:
+              type: string
+              description: (max length 60) Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              example: John
+            lastName:
+              type: string
+              description: (max length 60) Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              example: Newborn
+            fullName:
+              type: string
+              description: '(max length 240) Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
+              example: 'Ing. John Newborn, Csc.'
+            phone:
+              type: string
+              description: (max length 13) Phone number with country code (including leading `+`).
+              example: '+420123456789'
+      description: Customer data
+    PrecheckRequest:
+      title: PrecheckRequest
+      required:
+        - customer
+      type: object
+      properties:
+        customer:
+          allOf:
+            - $ref: '#/components/schemas/PrecheckCustomerRequest'
+            - description: Customer data
+        order:
+          allOf:
+            - $ref: '#/components/schemas/PrecheckOrderRequest'
+            - description: Order information for precheck validation
+        type:
+          allOf:
+            - $ref: '#/components/schemas/FinancingType2'
+            - description: 'Financing type, if type is not sent `DEFERRED_PAYMENT` is selected.'
+      description: Precheck data (has similar structure as `Application`).
+    PrecheckAddress:
+      title: PrecheckAddress
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name on address
+          example: John Doe
+        country:
+          type: string
+          description: |-
+            Country.
+
+            (see [ISO 3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))
+          example: CZ
+        city:
+          type: string
+          description: (max length 100) City.
+          example: Prague
+        streetAddress:
+          type: string
+          description: (max length 100) Street/city part.
+          example: Letenská
+        streetNumber:
+          type: string
+          description: (max length 50) Street number
+          example: '22'
+        zip:
+          type: string
+          description: (max length 30) Postal code
+          example: 140 00
+        addressType:
+          allOf:
+            - $ref: '#/components/schemas/AddressType'
+            - description: Type of the address. Only some of the types are allowed in each context.
+      description: Address information for precheck validation
+    PrecheckType:
+      title: Precheck Type
+      enum:
+        - DEFERRED_PAYMENT
+        - PAY_IN_THREE
+      type: string
+      description: Precheck result type for Funding type.
+    PrecheckOrderItemRequest:
+      title: PrecheckOrderItemRequest
+      type: object
+      properties:
+        code:
+          type: string
+          description: (max length 200) Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          example: EXC4677-1a
+        ean:
+          type: string
+          description: (max length 64) EAN code.
+          example: '888462064002'
+        name:
+          type: string
+          description: (max length 255) Item name
+          example: iPhone 6s 32GB SpaceGray
+        type:
+          allOf:
+            - $ref: '#/components/schemas/ItemType'
+            - description: Item type
+        variant:
+          type: string
+          description: (max length 250) Item variant
+          example: 32GB SpaceGray
+        description:
+          type: string
+          example: Mobile phone with 32GB of RAM
+        producer:
+          type: string
+          description: (max length 250)
+          example: Apple
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of item categories
+        totalPrice:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        totalVat:
+          allOf:
+            - $ref: '#/components/schemas/VatAmount'
+            - description: Financial amount with VAT rate.
+        productUrl:
+          type: string
+          description: (max length 200) URL of the item in e-shop
+          example: 'https://www.example.com?itemId=10'
+        unitPrice:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        unitVat:
+          allOf:
+            - $ref: '#/components/schemas/VatAmount'
+            - description: Financial amount with VAT rate.
+        quantity:
+          type: number
+          description: '(positive float/decimal up to 3 decimal places) Item quantity. If empty, considered as 1.'
+          example: 1
+      description: Order item information for precheck validation
+    PrecheckOrderRequest:
+      title: PrecheckOrderRequest
+      type: object
+      properties:
+        number:
+          type: string
+          description: (max length 100) Order number (internal for e-shop)
+          example: AA234
+        variableSymbols:
+          type: array
+          items:
+            type: string
+          description: '(max length 10)  Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+        totalPrice:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+            - description: Financial amount
+        totalVat:
+          type: array
+          items:
+            $ref: '#/components/schemas/VatAmount'
+          description: Total VAT amounts split by their VAT rates
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+          description: Addresses. Only `BILLING` and `DELIVERY` types are allowed.
+        deliveryType:
+          allOf:
+            - $ref: '#/components/schemas/DeliveryType'
+            - description: 'Delivery type, for `DELIVERY_CARRIER` type can be further specified by `deliveryCarrier` attribute.'
+        deliveryCarrier:
+          allOf:
+            - $ref: '#/components/schemas/DeliveryCarrier'
+            - description: Delivery carrier
+        reservationDate:
+          type: string
+          description: |-
+            Date and time until order is reserved.
+
+            Until 'reservationDate' Skip Pay will try to notify partner with Application notification about approval or rejection.
+
+            After this date and time, e-shop does not guarantee items availability (if application processing is longer, it may endanger order fullfillment).
+          nullable: true
+          example: '2017-07-15T00:00:00+02:00'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrecheckOrderItemRequest'
+          description: Order items
+        merchantId:
+          type: string
+          description: Merchant identification (ie. in case of multiple e-shops managed by one credentials)
+      description: Order information for precheck validation
+    PrecheckResultResponse:
+      title: PrecheckResultResponse
+      required:
+        - type
+        - recommendation
+        - probabilityOfApproval
+        - code
+        - customerType
+      type: object
+      properties:
+        type:
+          allOf:
+            - $ref: '#/components/schemas/PrecheckType'
+            - description: Precheck result type for Funding type.
+        recommendation:
+          type: boolean
+          description: |-
+            A recommendation of whether the order should be passed to the Skip Pay.
+
+            true = Application is going to be likely approved.
+            false = Application is going to be likely rejected.
+        probabilityOfApproval:
+          type: number
+          description: |-
+            Probability of approval.
+
+            0 = 0% to be approved
+            1 = 100% to be approved
+
+            Partner can create custom logic not to follow the recommendation (be more strict or benevolent).
+        completeness:
+          type: number
+          description: 'Completness of the result. <0, 1> The lower is the value, the lower accuracy of the result.'
+        code:
+          allOf:
+            - $ref: '#/components/schemas/Code'
+            - description: Result code.
+              example: OK
+        CustomerType:
+          allOf:
+            - $ref: '#/components/schemas/CustomerType'
+            - description: Customer type.
+        message:
+          type: string
+          description: |-
+            Custom message for customer.
+
+            Examples:
+            “V Skip Pay peněžence nemáte dostatečný limit.”
+            “Uveďte do objednávky jméno a příjmení, které používáte ve službě Skip Pay.”
+            etc.
+        additionalData:
+          type: array
+          items:
+            type: string
+          description: |-
+            List of additional data that customer has to send.
+
+            Possible values in array: `PERSONAL_ID`, `ID_CARD_NO`, `ID_CARD_EXPIRY_DATE`, `ID_CARD_SCAN`, `THIRD_PARTY_TELCO_CONSENT`.
+      description: Precheck result.
+    PrecheckResultsResponse:
+      title: PrecheckResultsResponse
+      required:
+        - id
+        - results
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identificator of precheck. Send this identificator in ApplicationRequest for better approval rate.
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrecheckResultResponse'
+          description: Precheck results for each type of product.
+        limits:
+          allOf:
+            - $ref: '#/components/schemas/Limits'
+            - description: Customer's limits
+      description: Precheck results.
+    PagingInfo:
+      title: PagingInfo
+      required:
+        - itemsPerPage
+      type: object
+      properties:
+        itemsPerPage:
+          type: number
+          description: Number of items per page
+          example: 10
+        nextPage:
+          type: string
+          description: 'Request to retrieve next page, if it exists and can be unambiguously specified'
+          example: transactions?sort=category&limit=10&after=25
+        prevPage:
+          type: string
+          description: 'Request to retrieve previous page, if it exists and can be unambiguously specified'
+          example: transactions?sort=category&limit=10&before=25
+    Paymentnotificationresponse:
+      title: Paymentnotificationresponse
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+      example:
+        status: OK
+    RecurrenceUpdateRequest:
+      title: RecurrenceUpdateRequest
+      required:
+        - state
+      type: object
+      properties:
+        state:
+          enum:
+            - CANCELLED
+          type: string
+          description: This endpoint allows only one option
+          example: CANCELLED
+    VatAmount:
+      title: VatAmount
+      allOf:
+        - $ref: '#/components/schemas/Amount'
+        - required:
+            - vatRate
+          type: object
+          properties:
+            vatRate:
+              type: number
+              description: VAT rate as positive number (ie. 15 represents 15% rate). 0 is allowed.
+              example: 15
+      description: Financial amount with VAT rate.
+    RecurrenceObject:
+      title: RecurrenceObject
+      required:
+        - id
+        - state
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier in Skip Pay
+          example: abcd1234
+        state:
+          allOf:
+            - $ref: '#/components/schemas/RecurrenceState'
+            - description: Recurrence state
+    RecurrenceState:
+      title: Recurrence State
+      enum:
+        - APPROVING
+        - READY
+        - CANCELLED
+        - EXPIRED
+      type: string
+      description: Recurrence state
+    ReasonState:
+      title: Reason State
+      enum:
+        - PROCESSING_REDIRECT_NEEDED
+        - PROCESSING_PREAPPROVED
+        - PROCESSING_VALIDATION_IN_PROGRESS
+        - REJECTED
+        - CANCELLED_NOT_PAID
+        - READY_TO_SHIP
+        - READY_SHIPPED
+        - READY_DELIVERED
+        - READY_PAID
+        - CANCELLED_RETURNED
+      type: string
+      description: 'Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state'
+      example: PROCESSING_REDIRECT_NEEDED
+    Severity:
+      title: Severity
+      enum:
+        - ERROR
+        - WARN
+        - INFO
+      type: string
+  securitySchemes:
+    httpBearer:
+      type: http
+      scheme: bearer
+security:
+  - httpBearer: []
+tags:
+  - name: Application operations
+    description: Services that allows processing of *application* and *order* during their whole lifecycle.
+  - name: Precheck operations
+    description: 'Services that allow partner e-shops find out a probability of *application''s* approval and limits of particular customer, if known to Skip Pay'
+  - name: Merchantsite operations
+    description: |-
+      Services that should be developed and exposed by partner e-shops to allow Skip Pay asynchronously inform these partner e-shops about important changes regarding particular *applications* and *orders*
+      > **ATTENTION:** This set of APIs is NOT exposed from Skip Pay. Instead, it should be developed by partner and accept calls specified below.
+  - name: Health check
+    description: 'To check the availability of back-end services use the [health check resource](#reference/health-check/health-check).'
