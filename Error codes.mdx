@@ -1,0 +1,67 @@
+# HTTP error status codes
+
+We use following status codes throughout the API, except for OAuth flow when response codes are prescribed in RFC
+
+| Error code | Error status | Description | Possible fix |
+|--|--|--|--|
+|  400| Bad Request | The server was unable to understand the request due to invalid syntax or a missing parameter. | Please review the request parameters and syntax, and make any necessary corrections before resubmitting the request. |
+|  401| Unauthorized | The user is not authenticated or does not have permission to access the requested resource. | Please check your login credentials and ensure that you have the appropriate permissions to access the resource. If the problem persists, please contact our support team for assistance. |
+|  403| Forbidden | The user is authenticated, but does not have permission to access the requested resource. | Please contact our support team for assistance, as this error is typically caused by a server-side issue that is outside of your control.
+|  404| Not Found | The requested resource could not be found on the server.| Please check the URL and input parameters to ensure that they are correct.
+|  405| Method Not Allowed | The requested HTTP method is not allowed for the specified resource. | Please ensure that the HTTP method is correct for the resource being accessed, and that the URL is correct.
+|  422| Unprocessable Entity | The server was unable to process the request due to invalid data or parameters. | Please review the request data and parameters, and make any necessary corrections before resubmitting the request.
+|  429| Too Many Requests | The user has exceeded the rate limit for requests. | Please wait a few moments before resubmitting your request, or consider reducing the frequency of your requests to avoid exceeding the rate limit.
+|  500| Internal Server Error | The server encountered an unexpected condition that prevented it from fulfilling the request. | Please wait a few moments before resubmitting your request, or contact our support team for assistance if the problem persists.
+|  503| Service Unavailable | The server is currently unavailable and unable to handle the request. | Please wait a few moments before resubmitting your request, or contact our support team for assistance if the problem persists. 
+
+ 
+## Error handling
+
+Besides HTTP status codes, which are the main indication if something goes wrong, we also use `errors` object to report more details about errors.
+
+Errors object example:
+```javascript
+    {
+        ...
+        errors: [
+            {
+                "code": "ERR_100",
+                "message": "Invalid contract number",
+                "severity": "ERROR",
+                "attribute": "partyAccount.accountNumber",          // optional
+                "ticketId": "UAT1:AMS:20160516-091658.450:45e4" // optional
+            },
+            {
+                "code": 352,
+                "message": "Insufficiend funds for payment order realization",
+                "severity": "WARN"
+            },
+            {
+                "code": 523,
+                "message": "This order will trigger currency exchange operation",
+                "severity": "INFO"
+            }
+        ]
+    }
+
+   ```
+ 
+## Error object attributes
+
+| Attribute name | Description  |
+|--|--|
+| `code` | unique error code |
+|`message`  | human readable error description (non-localized)  |
+| `severity` | error severity  |
+| `attribute` | json path of request attribute that caused the error (optional) |
+| `ticketId` | internal ticket ID, used for error backtracking  |
+
+### Error severity
+
+At SkipPay we have three levels of severity:
+
+| Level of severity | Description |
+|--|--|
+| `ERROR` | critical error, execution cannot continue. This MUST be indicated also by appropriate HTTP status code (`422 Unprocessable Entity`) |
+| `WARN` | non-critical error, execution can continue but further user interaction is advisable (for request to proceed, you MUST specify this error code in `override` request attribute). This MIGHT be indicated also by appropriate HTTP status code. |
+| `INFO` | information only, execution can continue without user interaction. |
