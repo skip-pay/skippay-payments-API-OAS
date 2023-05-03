@@ -28,14 +28,12 @@ paths:
       responses:
         '200':
           description: Partner acces token issued
-          headers: {}
           content:
             application/json; charset=utf-8:
               schema:
                 $ref: '#/components/schemas/PartnerLoginResult'
         '400':
           description: Unable to authenticate partner
-          headers: {}
           content:
             application/json; charset=utf-8:
               schema:
@@ -1061,7 +1059,8 @@ components:
       properties:
         name:
           type: string
-          description: (max length 100) Name on address
+          description: Name on address
+          maxLength: 100
           example: John Doe
         country:
           type: string
@@ -1069,19 +1068,23 @@ components:
           example: CZ
         city:
           type: string
-          description: (max length 100) City.
+          description: City
+          maxLength: 100
           example: Prague
         streetAddress:
           type: string
-          description: (max length 100) Street/city part.
+          description: Street/city part
+          maxLength: 100
           example: Letenská
         streetNumber:
           type: string
-          description: (max length 50) Street number
+          description: Street number
+          maxLength: 100
           example: '22'
         zip:
           type: string
-          description: (max length 30) Postal code
+          description: Postal code
+          maxLength: 30
           example: 140 00
         addressType:
           $ref: '#/components/schemas/AddressType'
@@ -1152,6 +1155,7 @@ components:
             isRecurring:
               type: boolean
               description: Ensures recurrence ID in reponse. Default is `false`
+              default: false
               example: false
     ApplicationResponse:
       title: ApplicationResponse
@@ -1272,15 +1276,18 @@ components:
       properties:
         titleBefore:
           type: string
-          description: '(max length 60) Academical degree, in front of the name'
+          description: Academical degree, in front of the name
+          maxLength: 60
           example: Ing.
         titleAfter:
           type: string
-          description: '(max length 60) Academical degree, behind name'
+          description: Academical degree, behind name
+          maxLength: 60
           example: CSc.
         email:
           type: string
-          description: (max length 254) E-mail address of customer
+          description: E-mail address of customer
+          maxLength: 254
           example: john.newborn@country.com
         addresses:
           type: array
@@ -1289,11 +1296,13 @@ components:
           description: Addresses. All types are allowed.
         tin:
           type: string
-          description: (max length 20) Tax identification number (ICO)
+          description: Tax identification number (ICO)
+          maxLength: 20
           example: '12333321'
         vatin:
           type: string
-          description: (max length 20) VAT identification number
+          description: VAT identification number
+          maxLength: 20
           example: CZ8402154456
         extraData:
           $ref: '#/components/schemas/CustomerExtraData'
@@ -1309,19 +1318,23 @@ components:
           properties:
             firstName:
               type: string
-              description: (max length 60) Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              description: Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              maxLength: 60
               example: John
             lastName:
               type: string
-              description: (max length 60) Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              description: Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              maxLength: 60
               example: Newborn
             fullName:
               type: string
-              description: '(max length 240) Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
+              description: Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.
+              maxLength: 240
               example: 'Ing. John Newborn, Csc.'
             phone:
               type: string
-              description: (max length 13) Phone number with country code (including leading `+`).
+              description: Phone number with country code (including leading `+`).
+              maxLength: 13
               example: '+420123456789'
             type:
               $ref: '#/components/schemas/CustomerType'
@@ -1334,19 +1347,23 @@ components:
           properties:
             firstName:
               type: string
-              description: (max length 60) Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              description: Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              maxLength: 60
               example: John
             lastName:
               type: string
-              description: (max length 60) Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              description: Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              maxLength: 60
               example: Newborn
             fullName:
               type: string
-              description: '(max length 240) Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
+              description: Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.
+              maxLength: 240
               example: 'Ing. John Newborn, Csc.'
             phone:
               type: string
-              description: (max length 13) Phone number with country code (including leading `+`). Phone number is by default required if you are not able to send it contact us.
+              description: Phone number with country code (including leading `+`). Phone number is by default required if you are not able to send it contact us.
+              maxLength: 13
               example: '+420123456789'
     CustomerType:
       title: Customer Type
@@ -1364,11 +1381,13 @@ components:
       properties:
         transactionsNumber:
           type: number
-          description: (positive integer) Historical count of customer's cash transactions made in partner's e-shop
+          description: Historical count of customer's cash transactions made in partner's e-shop
+          minimum: 1
           example: 10
         cashlessTransactionsNumber:
           type: number
-          description: (positive integer) Historical count of customer's cashless transactions made in partner's e-shop
+          description: Historical count of customer's cashless transactions made in partner's e-shop
+          minimum: 1
           example: 5
         transactionsSum:
           $ref: '#/components/schemas/Amount'
@@ -1376,33 +1395,40 @@ components:
           $ref: '#/components/schemas/Amount'
         latestTransactionDate:
           type: string
+          format: date
           description: Newest transaction date on partner e-shop.
           example: '2017-01-10'
         earliestTransactionDate:
           type: string
+          format: date
           description: Oldest transaction date on partner e-shop
           example: '2015-10-12'
         pageTotalTime:
           type: number
-          description: (positive integer) Total time spent on partners website (in seconds)
+          description: Total time spent on partners website (in seconds)
+          minimum: 1
           example: 250
         pageReviewsTime:
           type: number
-          description: (positive integer) Total time spent on partners website in review and comments sections (in seconds)
+          description: Total time spent on partners website in review and comments sections (in seconds)
+          minimum: 1
           example: 100
         cartItemsRemoved:
           type: number
-          description: (positive integer) Total count of removed items form shopping basket during current shopping
+          description: Total count of removed items form shopping basket during current shopping
+          minimum: 1
           example: 2
         itemsViewed:
           type: number
-          description: (positive integer) Number of viewed pages with products
+          description: Number of viewed pages with products
+          minimum: 1
           example: 10
         tags:
           type: array
           items:
             type: string
-          description: '(array[max length 10]) List of custom tags (ie. information, that customer is club member, vip customer, etc.)'
+            maxLength: 10
+          description: List of custom tags (ie. information, that customer is club member, vip customer, etc.)
     CustomerBase1:
       title: CustomerBase1
       required:
@@ -1411,15 +1437,18 @@ components:
       properties:
         titleBefore:
           type: string
-          description: '(max length 60) Academical degree, in front of the name'
+          description: Academical degree, in front of the name.
+          maxLength: 60
           example: Ing.
         titleAfter:
           type: string
-          description: '(max length 60) Academical degree, behind name'
+          description:  Academical degree, behind name.
+          maxLength: 60
           example: CSc.
         email:
           type: string
-          description: (max length 254) E-mail address of customer
+          description: E-mail address of customer
+          maxLength: 254
           example: john.newborn@country.com
         addresses:
           type: array
@@ -1428,11 +1457,13 @@ components:
           description: Addresses. All types are allowed.
         tin:
           type: string
-          description: (max length 20) Tax identification number (ICO)
+          description: Tax identification number (ICO)
+          maxLength: 20
           example: '12333321'
         vatin:
           type: string
-          description: (max length 20) VAT identification number
+          description: VAT identification number
+          maxLength: 20
           example: CZ8402154456
         extraData:
           $ref: '#/components/schemas/CustomerExtraData'
@@ -1568,10 +1599,12 @@ components:
       properties:
         filename:
           type: string
-          description: (max length 100) File name.
+          description: File name.
+          maxLength: 100
           example: invoice.pdf
         url:
           type: string
+          format: url
           description: File URL.
           example: 'https://www.partner.com/file?id=12345'
     FinancingType:
@@ -1616,7 +1649,7 @@ components:
         projectVersion:
           type: string
           description: Version of the project
-          example: Skip Pay 2.40.0
+          example: Skip Pay 5.12.0
     InvoiceInfo:
       title: InvoiceInfo
       description: 'Billing information, to be included in invoice.'
@@ -1633,6 +1666,7 @@ components:
           $ref: '#/components/schemas/Address'
         dueDate:
           type: string
+          format: date
           description: Invoice due date.
           example: '2017-06-20'
         accountNumber:
@@ -1676,19 +1710,26 @@ components:
       properties:
         approvedRedirect:
           type: string
-          description: (max length 512) URL of the partner used for redirection of the customer back to partner website (from Skip Pay gateway) after application approval. Do not implement any business logic on accessing this URL by customer. Implement business logic to READY notification via `notificationEndpoint`.
+          format: url
+          description: URL of the partner used for redirection of the customer back to partner website (from Skip Pay gateway) after application approval. Do not implement any business logic on accessing this URL by customer. Implement business logic to READY notification via `notificationEndpoint`.
+          maxLength: 512
           example: 'http://www.yourEshop.com/paymentApproved.html'
         rejectedRedirect:
           type: string
-          description: (max length 512) URL of the partner used for redirection of the customer back to partner website (from Skip Pay gateway) after application rejection.  Do not implement any business logic on accessing this URL by customer. Implement business logic to REJECTED notification via `notificationEndpoint`.
+          format: url
+          description: URL of the partner used for redirection of the customer back to partner website (from Skip Pay gateway) after application rejection.  Do not implement any business logic on accessing this URL by customer. Implement business logic to REJECTED notification via `notificationEndpoint`.
+          maxLength: 512
           example: 'http://www.yourEshop.com/paymentRejected.html'
         notificationEndpoint:
           type: string
-          description: '(max length 512) URL of the partner used as a notification endpoint for obtaining important updates about application (approval, rejection, storno, etc.).'
+          description: URL of the partner used as a notification endpoint for obtaining important updates about application (approval, rejection, storno, etc.).
+          maxLength: 512
           example: 'http://www.yourEshop.com/notifications'
         paymentsEndpoint:
           type: string
-          description: (max length 512) URL of the partner used as a notification endpoint for obtaining information about payments connected with application.
+          format: url
+          description: URL of the partner used as a notification endpoint for obtaining information about payments connected with application.
+          maxLength: 512
           example: 'http://www.yourEshop.com/paymentNotification'
     OrderItemsChangeRequest:
       title: OrderItemsChangeRequest
@@ -1720,7 +1761,8 @@ components:
                $ref: '#/components/schemas/DocumentRequest'
             variableSymbol:
               type: string
-              description: '(max length 10)  Variable symbol of the new document (credit note, ...). This symbols is used by Skip Pay to pair payment from e-shop.'
+              description: Variable symbol of the new document (credit note, ...). This symbols is used by Skip Pay to pair payment from e-shop.
+              maxLength: 10
               example: '1234567890'
     OrderItemsSendRequest:
       title: OrderItemsSendRequest
@@ -1734,21 +1776,25 @@ components:
               example: INVOICE
             variableSymbol:
               type: string
-              description: '(max length 10)  Required if was not specified earlier in ''Create application'' or ''Change application order'' operations. Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
+              description: Required if was not specified earlier in ''Create application'' or ''Change application order'' operations. Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).
+              maxLength: 10
               example: '1234567890'
             specificSymbol:
               type: string
-              description: '(max length 10)  Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
+              description: Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).
+              maxLength: 10
               example: '1234567890'
             sentDate:
               type: string
+              format: date
               description: Shipping date
               example: '2017-01-12'
             deliveryCarrier:
               $ref: '#/components/schemas/DeliveryCarrier'
             deliveryTrackingNumber:
               type: string
-              description: (max length 64) Delivery tracking number
+              description: Delivery tracking number
+              maxLength: 64
               example: EEX1221
     OrderItemsDeliverRequest:
       title: OrderItemsDeliverRequest
@@ -1759,6 +1805,7 @@ components:
           properties:
             deliveryDate:
               type: string
+              format: date
               description: Delivery date
               example: '2017-01-15'
     OrderBase:
@@ -1771,13 +1818,15 @@ components:
       properties:
         number:
           type: string
-          description: (max length 100) Order number (internal for e-shop)
+          description: Order number (internal for e-shop)
+          maxLength: 100
           example: AA234
         variableSymbols:
           type: array
           items:
             type: string
-          description: '(max length 10) Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+          description: Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).
+          maxLength: 10
         totalPrice:
           $ref: '#/components/schemas/Amount'
         totalVat:
@@ -1844,7 +1893,8 @@ components:
               example: '2017-01-17T00:00:00+02:00'
             deliveryTrackingNumber:
               type: string
-              description: (max length 64) Delivery tracking number
+              description: Delivery tracking number
+              maxLength: 64
               example: EX12221
             sentDate:
               type: string
@@ -1935,28 +1985,33 @@ components:
       properties:
         code:
           type: string
-          description: (max length 200) Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          description: Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          maxLength: 200
           example: EXC4677-1a
         ean:
           type: string
-          description: (max length 64) EAN code.
+          description: EAN code.
+          maxLength: 64
           example: '888462064002'
         name:
           type: string
-          description: (max length 255) Item name
+          description: Item name
+          maxLength: 255
           example: iPhone 6s 32GB SpaceGray
         type:
           $ref: '#/components/schemas/ItemType'
         variant:
           type: string
-          description: (max length 250) Item variant
+          description: Item variant
+          maxLength: 250
           example: 32GB SpaceGray
         description:
           type: string
           example: Mobile phone with 32GB of RAM
         producer:
           type: string
-          description: (max length 250)
+          description: Producer name
+          maxLength: 250
           example: Apple
         categories:
           type: array
@@ -1969,8 +2024,10 @@ components:
           $ref: '#/components/schemas/VatAmount'
         productUrl:
           type: string
-          description: (max length 200) URL of the item in e-shop
-          example: 'https://www.example.com?itemId=10'
+          format: url
+          description: URL of the item in e-shop
+          maxLength: 200
+          example: https://www.example.com
       description: 'Order item base information, needed to identify order item'
     OrderItemRequest:
       title: OrderItemRequest
@@ -1987,6 +2044,7 @@ components:
             quantity:
               type: number
               description: '(positive float/decimal up to 3 decimal places) Item quantity. If empty, considered as 1.'
+              minimum: 1
               example: 1
       description: 'Order item information, needed to create an application.'
     OrderItemResponse:
@@ -2005,15 +2063,18 @@ components:
               $ref: '#/components/schemas/OrderState'
             sentDate:
               type: string
+              format: date
               description: Date when item was sent. Only when the whole order was NOT sent at once.
               example: '2017-01-10'
             deliveryDate:
               type: string
+              format: date
               description: Date when item was delivered. Only when the whole order was NOT sent at once.
               example: '2017-01-12'
             deliveryTrackingNumber:
               type: string
-              description: (max length 64) Tracking number for the item. Only when the whole order was NOT sent at once.
+              description: Tracking number for the item. Only when the whole order was NOT sent at once.
+              maxLength: 64
               example: EX21121
             image:
               $ref: '#/components/schemas/FileResponse'
@@ -2024,6 +2085,7 @@ components:
             quantity:
               type: number
               description: (positive float/decimal up to 3 decimal places) Item quantity.
+              minimum: 1
               example: 1
     OrderState:
       title: Order State
@@ -2043,21 +2105,25 @@ components:
       properties:
         code:
           type: string
-          description: (max length 200) Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          description: Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          maxLength: 200
           example: EXC4677-1a
         ean:
           type: string
-          description: (max length 64) EAN code.
+          description: EAN code.
+          maxLength: 64
           example: '888462064002'
         name:
           type: string
-          description: (max length 255) Item name
+          description: Item name
+          maxLength: 255
           example: iPhone 6s 32GB SpaceGray
         type:
           $ref: '#/components/schemas/ItemType'
         quantity:
           type: number
           description: '(positive float/decimal up to 3 decimal places) Item quantity. If empty, considered as whole item quantity is selected'
+          minimum: 1
           example: 1
     Payment:
       title: Payment
@@ -2074,6 +2140,7 @@ components:
           example: 1a12
         date:
           type: string
+          format: date
           description: Payment date
           example: '2017-05-20'
         applicationId:
@@ -2127,10 +2194,12 @@ components:
       properties:
         filename:
           type: string
-          description: (max length 100) File name.
+          description: File name.
+          maxLength: 100
           example: invoice.pdf
         url:
           type: string
+          format: url
           description: File URL (URL is accessible only 1 hour from its generation for security reasons)
           example: 'https://www.partner.com/file?id=12345'
     PrecheckCustomerRequest:
@@ -2143,19 +2212,23 @@ components:
           properties:
             firstName:
               type: string
-              description: (max length 60) Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              description: Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty.
+              maxLength: 60
               example: John
             lastName:
               type: string
-              description: (max length 60) Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              description: Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty.
+              maxLength: 60
               example: Newborn
             fullName:
               type: string
-              description: '(max length 240) Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
+              description: Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.
+              maxLength: 240
               example: 'Ing. John Newborn, Csc.'
             phone:
               type: string
-              description: (max length 13) Phone number with country code (including leading `+`).
+              description: Phone number with country code (including leading `+`).
+              maxLength: 13
               example: '+420123456789'
       description: Customer data
     PrecheckRequest:
@@ -2188,19 +2261,23 @@ components:
           example: CZ
         city:
           type: string
-          description: (max length 100) City.
+          description: City
+          maxLength: 100
           example: Prague
         streetAddress:
           type: string
-          description: (max length 100) Street/city part.
+          description: Street/city part
+          maxLength: 100
           example: Letenská
         streetNumber:
           type: string
-          description: (max length 50) Street number
+          description: Street number
+          maxLength: 50
           example: '22'
         zip:
           type: string
-          description: (max length 30) Postal code
+          description: Postal code
+          maxLength: 30
           example: 140 00
         addressType:
           $ref: '#/components/schemas/AddressType'
@@ -2220,28 +2297,33 @@ components:
       properties:
         code:
           type: string
-          description: (max length 200) Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          description: Internal code for item (internal to e-shop). Used to better identify the item for future changes
+          maxLength: 200
           example: EXC4677-1a
         ean:
           type: string
-          description: (max length 64) EAN code.
+          description: EAN code
+          maxLength: 64
           example: '888462064002'
         name:
           type: string
-          description: (max length 255) Item name
+          description: Item name
+          maxLength: 255
           example: iPhone 6s 32GB SpaceGray
         type:
           $ref: '#/components/schemas/ItemType'
         variant:
           type: string
-          description: (max length 250) Item variant
+          description: Item variant
+          maxLength: 250
           example: 32GB SpaceGray
         description:
           type: string
           example: Mobile phone with 32GB of RAM
         producer:
           type: string
-          description: (max length 250)
+          description: Producer name
+          maxLength: 250
           example: Apple
         categories:
           type: array
@@ -2254,8 +2336,10 @@ components:
           $ref: '#/components/schemas/VatAmount'
         productUrl:
           type: string
-          description: (max length 200) URL of the item in e-shop
-          example: 'https://www.example.com?itemId=10'
+          format: url
+          description: URL of the item in e-shop
+          maxLength: 200
+          example: https://www.example.com
         unitPrice:
           $ref: '#/components/schemas/Amount'
         unitVat:
@@ -2270,13 +2354,15 @@ components:
       properties:
         number:
           type: string
-          description: (max length 100) Order number (internal for e-shop)
+          description: Order number (internal for e-shop)
+          maxLength: 100
           example: AA234
         variableSymbols:
           type: array
           items:
             type: string
-          description: '(max length 10)  Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+          description: Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).
+          maxLength: 10
         totalPrice:
           $ref: '#/components/schemas/Amount'
         totalVat:
@@ -2433,6 +2519,7 @@ components:
             vatRate:
               type: number
               description: VAT rate as positive number (ie. 15 represents 15% rate). 0 is allowed.
+              minimum: 0
               example: 15
       description: Financial amount with VAT rate.
     RecurrenceObject:
