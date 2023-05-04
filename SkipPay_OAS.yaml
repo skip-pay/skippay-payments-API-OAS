@@ -1553,32 +1553,6 @@ components:
           type: string
           description: 'Variable symbol of this document (proforma, invoice, ...)'
           example: '1234567890'
-    ErrorResponse:
-      title: ErrorResponse
-      required:
-        - code
-        - message
-        - severity
-      type: object
-      properties:
-        code:
-          type: string
-          description: Unique internal error code
-          example: ERR_1000_SOME_ERROR_CODE
-        message:
-          type: string
-          description: Human readable error description (non-localized)
-          example: Some error/validation message description
-        severity:
-          $ref: '#/components/schemas/Severity'
-        attribute:
-          type: string
-          description: JSON path of request attribute that caused the error (if applicable)
-          example: personalBirthNumber
-        ticketId:
-          type: string
-          description: 'Internal ticket ID, used for error backtracking'
-          example: 'UAT1:AMS:20160516-091658.450:45e4'
     ErrorsResponse:
       title: ErrorsResponse
       required:
@@ -1588,7 +1562,30 @@ components:
         errors:
           type: array
           items:
-            $ref: '#/components/schemas/ErrorResponse'
+            required:
+              - code
+              - message
+              - severity
+            type: object
+            properties:
+              code:
+                type: string
+                description: Unique internal error code
+                example: ERR_1000_SOME_ERROR_CODE
+              message:
+                type: string
+                description: Human readable error description (non-localized)
+                example: Some error/validation message description
+              severity:
+                $ref: '#/components/schemas/Severity'
+              attribute:
+                type: string
+                description: JSON path of request attribute that caused the error (if applicable)
+                example: personalBirthNumber
+              ticketId:
+                type: string
+                description: 'Internal ticket ID, used for error backtracking'
+                example: 'UAT1:AMS:20160516-091658.450:45e4'
           description: Array with errors
     FileResponse:
       title: FileResponse
