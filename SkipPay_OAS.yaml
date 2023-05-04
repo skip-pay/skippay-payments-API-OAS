@@ -1842,6 +1842,7 @@ components:
           $ref: '#/components/schemas/DeliveryCarrier'
         reservationDate:
           type: string
+          format: datetime
           description: |-
             Date and time until order is reserved.
 
@@ -1886,8 +1887,9 @@ components:
               $ref: '#/components/schemas/OrderState'
             deliveryDate:
               type: string
+              format: date
               description: Date and time of delivery
-              example: '2017-01-17T00:00:00+02:00'
+              example: '2017-01-17'
             deliveryTrackingNumber:
               type: string
               description: Delivery tracking number
@@ -1895,8 +1897,9 @@ components:
               example: EX12221
             sentDate:
               type: string
+              format: date
               description: Date and time of order shipping
-              example: '2017-01-12T00:00:00+02:00'
+              example: '2017-01-12'
             documents:
               type: array
               items:
@@ -1953,6 +1956,7 @@ components:
           $ref: '#/components/schemas/DeliveryCarrier'
         reservationDate:
           type: string
+          format: datetime
           description: |-
             Date and time until order is reserved.
 
@@ -2378,6 +2382,7 @@ components:
           $ref: '#/components/schemas/DeliveryCarrier'
         reservationDate:
           type: string
+          format: datetime
           description: |-
             Date and time until order is reserved.
 
