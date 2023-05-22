@@ -1474,8 +1474,6 @@ components:
       example: DPD
     DocumentSerializer:
       title: Document Serializer
-      x-stoplight:
-        id: b461015620c7e
       description: Type of the document
       type: string
       enum:
