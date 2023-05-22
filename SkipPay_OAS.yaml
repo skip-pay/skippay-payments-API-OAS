@@ -1062,6 +1062,7 @@ components:
           description: Name on address
           maxLength: 100
           example: John Doe
+          nullable: true
         country:
           type: string
           description: 'Country. (see [ISO 3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))'
@@ -1081,6 +1082,7 @@ components:
           description: Street number
           maxLength: 100
           example: '22'
+          nullable: true
         zip:
           type: string
           description: Postal code
@@ -1128,20 +1130,56 @@ components:
           description: Unique identifier in Skip Pay
           example: 11200a0ee1
         state:
-            $ref: '#/components/schemas/ApplicationState'
+          title: state
+          description: Application state.
+          enum:
+            - PROCESSING
+            - READY
+            - REJECTED
+            - CANCELLED
+          type: string
+          example: PROCESSING
         stateReason:
-          $ref: '#/components/schemas/ReasonState'
+          title: Reason State
+          enum:
+            - PROCESSING_REDIRECT_NEEDED
+            - PROCESSING_PREAPPROVED
+            - PROCESSING_VALIDATION_IN_PROGRESS
+            - REJECTED
+            - CANCELLED_NOT_PAID
+            - READY_TO_SHIP
+            - READY_SHIPPED
+            - READY_DELIVERED
+            - READY_PAID
+            - CANCELLED_RETURNED
+          type: string
+          description: 'Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state'
+          example: PROCESSING_REDIRECT_NEEDED
     ApplicationCancelRequest:
       title: ApplicationCancelRequest
       description: Specification of the reason why the application is cancelled.
       type: object
       properties:
         reason:
-          $ref: '#/components/schemas/CancelationReason'
+          title: reason
+          enum:
+            - APPLICATION_CANCELLED_CARRIER_CHANGED
+            - APPLICATION_CANCELLED_CART_CONTENT_CHANGED
+            - APPLICATION_CANCELLED_BY_CUSTOMER
+            - APPLICATION_CANCELLED_BY_ERP
+            - APPLICATION_CANCELLED_EXPIRED
+            - APPLICATION_CANCELLED_UNFINISHED
+            - APPLICATION_CANCELLED_BY_ESHOP_RULES
+            - APPLICATION_CANCELLED_OTHER
+          type: string
+          description: Reason of cancellation. Considered as `APPLICATION_CANCELLED_OTHER` if not set.
+          example: APPLICATION_CANCELLED_BY_CUSTOMER
+          nullable: true
         customReason:
           type: string
           description: Specification of `APPLICATION_CANCELLED_OTHER` reason
-          example: "My specific reason."
+          example: My specific reason.
+          nullable: true
     ApplicationRequest:
       title: ApplicationRequest
       allOf:
@@ -1165,6 +1203,9 @@ components:
         - required:
             - customer
             - order
+            - agreementTermsAndConditions
+            - gatewayRedirectUrl
+            - type
           type: object
           properties:
             customer:
@@ -1180,25 +1221,16 @@ components:
             gatewayRedirectUrl:
               type: string
               description: Gateway redirect URL. Redirect user to this URL if state is `PROCESSING` and stateReason is `PROCESSING_REDIRECT_NEEDED`.
-              example: "http://myredirectURL.com"
+              example: 'http://myredirectURL.com'
             recurrence:
               $ref: '#/components/schemas/RecurrenceObject'
-    ApplicationState:
-      title: state
-      description: Application state.
-      enum:
-        - PROCESSING
-        - READY
-        - REJECTED
-        - CANCELLED
-      type: string
-      example: PROCESSING
     ApplicationWithoutCustomerRequest:
       title: ApplicationWithoutCustomerRequest
       description: Financing application request
       required:
         - order
         - merchantUrls
+        - type
       type: object
       properties:
         order:
@@ -1226,7 +1258,8 @@ components:
         reason:
           type: string
           description: Reason of change.
-          example: "My reason of change."
+          example: My reason of change.
+          nullable: true
         order:
           $ref: '#/components/schemas/OrderChangeRequest'
     Applicationnotificationresponse:
@@ -1239,35 +1272,6 @@ components:
           type: string
       example:
         status: OK
-    CancelationReason:
-      title: reason
-      enum:
-        - APPLICATION_CANCELLED_CARRIER_CHANGED
-        - APPLICATION_CANCELLED_CART_CONTENT_CHANGED
-        - APPLICATION_CANCELLED_BY_CUSTOMER
-        - APPLICATION_CANCELLED_BY_ERP
-        - APPLICATION_CANCELLED_EXPIRED
-        - APPLICATION_CANCELLED_UNFINISHED
-        - APPLICATION_CANCELLED_BY_ESHOP_RULES
-        - APPLICATION_CANCELLED_OTHER
-      type: string
-      description: Reason of cancellation. Considered as `APPLICATION_CANCELLED_OTHER` if not set.
-      example: APPLICATION_CANCELLED_BY_CUSTOMER
-    Code:
-      title: code
-      description: Result code.
-      enum:
-        - OK
-        - UNKNOWN
-        - NOT_AVAILABLE
-        - ADDITIONAL_DATA_SECURITY
-        - ADDITIONAL_DATA_LIMIT
-        - INSUFFICIENT_LIMIT
-        - INSUFFICIENT_LIMIT_OPPORTUNITY
-        - DETAILS_NOT_MATCHING
-        - MANUAL_VERIFICATION
-      type: string
-      example: OK
     CustomerBase:
       title: CustomerBase
       required:
@@ -1276,14 +1280,16 @@ components:
       properties:
         titleBefore:
           type: string
-          description: Academical degree, in front of the name
+          description: 'Academical degree, in front of the name'
           maxLength: 60
           example: Ing.
+          nullable: true
         titleAfter:
           type: string
-          description: Academical degree, behind name
+          description: 'Academical degree, behind name'
           maxLength: 60
           example: CSc.
+          nullable: true
         email:
           type: string
           description: E-mail address of customer
@@ -1299,11 +1305,13 @@ components:
           description: Tax identification number (ICO)
           maxLength: 20
           example: '12333321'
+          nullable: true
         vatin:
           type: string
           description: VAT identification number
           maxLength: 20
           example: CZ8402154456
+          nullable: true
         extraData:
           $ref: '#/components/schemas/CustomerExtraData'
       description: Customer data
@@ -1314,6 +1322,10 @@ components:
         - $ref: '#/components/schemas/CustomerBase'
         - required:
             - type
+            - firstName
+            - lastName
+            - fullName
+            - phone
           type: object
           properties:
             firstName:
@@ -1328,7 +1340,7 @@ components:
               example: Newborn
             fullName:
               type: string
-              description: Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.
+              description: 'Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
               maxLength: 240
               example: 'Ing. John Newborn, Csc.'
             phone:
@@ -1336,14 +1348,16 @@ components:
               description: Phone number with country code (including leading `+`).
               maxLength: 13
               example: '+420123456789'
-            type:
-              $ref: '#/components/schemas/CustomerType'
+            PrecheckResultResponseSerializer:
+              $ref: '#/components/schemas/PrecheckResultResponseSerializer'
     CustomerRequest:
       title: CustomerRequest
       description: Customer data
       allOf:
         - $ref: '#/components/schemas/CustomerBase'
         - type: object
+        - required:
+            - phone
           properties:
             firstName:
               type: string
@@ -1357,7 +1371,7 @@ components:
               example: Newborn
             fullName:
               type: string
-              description: Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.
+              description: 'Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
               maxLength: 240
               example: 'Ing. John Newborn, Csc.'
             phone:
@@ -1365,16 +1379,6 @@ components:
               description: Phone number with country code (including leading `+`). Phone number is by default required if you are not able to send it contact us.
               maxLength: 13
               example: '+420123456789'
-    CustomerType:
-      title: Customer Type
-      enum:
-        - UNKNOWN
-        - FIRST_ORDER
-        - FULL
-        - BLOCKED
-      type: string
-      description: Customer type.
-      example: UNKNOWN
     CustomerExtraData:
       title: CustomerExtraData
       type: object
@@ -1384,11 +1388,13 @@ components:
           description: Historical count of customer's cash transactions made in partner's e-shop
           minimum: 1
           example: 10
+          nullable: true
         cashlessTransactionsNumber:
           type: number
           description: Historical count of customer's cashless transactions made in partner's e-shop
           minimum: 1
           example: 5
+          nullable: true
         transactionsSum:
           $ref: '#/components/schemas/Amount'
         cashlessTransactionsSum:
@@ -1398,76 +1404,44 @@ components:
           format: date
           description: Newest transaction date on partner e-shop.
           example: '2017-01-10'
+          nullable: true
         earliestTransactionDate:
           type: string
           format: date
           description: Oldest transaction date on partner e-shop
           example: '2015-10-12'
+          nullable: true
         pageTotalTime:
           type: number
           description: Total time spent on partners website (in seconds)
           minimum: 1
           example: 250
+          nullable: true
         pageReviewsTime:
           type: number
           description: Total time spent on partners website in review and comments sections (in seconds)
           minimum: 1
           example: 100
+          nullable: true
         cartItemsRemoved:
           type: number
           description: Total count of removed items form shopping basket during current shopping
           minimum: 1
           example: 2
+          nullable: true
         itemsViewed:
           type: number
           description: Number of viewed pages with products
           minimum: 1
           example: 10
+          nullable: true
         tags:
           type: array
           items:
             type: string
             maxLength: 10
-          description: List of custom tags (ie. information, that customer is club member, vip customer, etc.)
-    CustomerBase1:
-      title: CustomerBase1
-      required:
-        - email
-      type: object
-      properties:
-        titleBefore:
-          type: string
-          description: Academical degree, in front of the name.
-          maxLength: 60
-          example: Ing.
-        titleAfter:
-          type: string
-          description:  Academical degree, behind name.
-          maxLength: 60
-          example: CSc.
-        email:
-          type: string
-          description: E-mail address of customer
-          maxLength: 254
-          example: john.newborn@country.com
-        addresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/PrecheckAddress'
-          description: Addresses. All types are allowed.
-        tin:
-          type: string
-          description: Tax identification number (ICO)
-          maxLength: 20
-          example: '12333321'
-        vatin:
-          type: string
-          description: VAT identification number
-          maxLength: 20
-          example: CZ8402154456
-        extraData:
-          $ref: '#/components/schemas/CustomerExtraData'
-      description: Customer data
+          description: 'List of custom tags (ie. information, that customer is club member, vip customer, etc.)'
+          nullable: true
     DeliveryType:
       title: deliveryType
       enum:
@@ -1498,8 +1472,10 @@ components:
         - MALL_DEPOSIT
       type: string
       example: DPD
-    DocumentType:
-      title: Document Type
+    DocumentSerializer:
+      title: Document Serializer
+      x-stoplight:
+        id: b461015620c7e
       description: Type of the document
       type: string
       enum:
@@ -1518,13 +1494,14 @@ components:
       properties:
         type:
           allOf:
-            - $ref: '#/components/schemas/DocumentType'
+            - $ref: '#/components/schemas/DocumentSerializer'
         file:
           $ref: '#/components/schemas/FileRequest'
         description:
           type: string
           description: File description
           example: This is an invoice
+          nullable: true
         extraData:
           $ref: '#/components/schemas/DocumentExtraData'
     DocumentResponse:
@@ -1536,13 +1513,14 @@ components:
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/DocumentType'
+          $ref: '#/components/schemas/DocumentSerializer'
         file:
           $ref: '#/components/schemas/PrivateFileResponse'
         description:
           type: string
           description: File description
           example: This is an invoice
+          nullable: true
         extraData:
           $ref: '#/components/schemas/DocumentExtraData'
     DocumentExtraData:
@@ -1553,6 +1531,7 @@ components:
           type: string
           description: 'Variable symbol of this document (proforma, invoice, ...)'
           example: '1234567890'
+          nullable: true
     ErrorsResponse:
       title: ErrorsResponse
       required:
@@ -1577,7 +1556,13 @@ components:
                 description: Human readable error description (non-localized)
                 example: Some error/validation message description
               severity:
-                $ref: '#/components/schemas/Severity'
+                title: Severity
+                enum:
+                  - ERROR
+                  - WARN
+                  - INFO
+                type: string
+                example: ERROR
               attribute:
                 type: string
                 description: JSON path of request attribute that caused the error (if applicable)
@@ -1618,14 +1603,6 @@ components:
           example: RmlsZSBjb250ZW50cy4gwq9cXyjjg4QpXy/Crw==
         - type: string
           example: 'https://www.partner.com/file?id=12345'
-    FinancingType2:
-      title: Financing Type 2
-      description: 'Financing type, if type is not sent `DEFERRED_PAYMENT` is selected.'
-      enum:
-        - DEFERRED_PAYMENT
-        - PAY_IN_THREE
-      type: string
-      example: DEFERRED_PAYMENT
     Getpaymentsonspecificapplicationresponse:
       title: Getpaymentsonspecificapplicationresponse
       required:
@@ -1642,11 +1619,14 @@ components:
       title: HealthCheckResponse
       description: Health check response
       type: object
+      required:
+        - projectVersion
       properties:
         projectVersion:
           type: string
           description: Version of the project
           example: Skip Pay 5.12.0
+          nullable: true
     InvoiceInfo:
       title: InvoiceInfo
       description: 'Billing information, to be included in invoice.'
@@ -1659,6 +1639,7 @@ components:
           type: string
           description: 'Customer full name, including academical degrees and salutation (Mr./Mrs./..). Empty if requested via customerDueDateCategory.'
           example: 'Ing. Jan Novák, Csc.'
+          nullable: true
         address:
           $ref: '#/components/schemas/Address'
         dueDate:
@@ -1682,6 +1663,7 @@ components:
         - FEE
         - INSURANCE
       type: string
+      nullable: true
       example: PHYSICAL
     Limits:
       title: Limits
@@ -1702,8 +1684,7 @@ components:
         - rejectedRedirect
         - notificationEndpoint
       type: object
-      description: Collection of URLs used for redirection of a customer back to a partner website or as a notification endpoint.
-        Services that should be developed and exposed by partner e-shops to allow Skip Pay to asynchronously inform these partners about important changes regarding particular applications and orders.
+      description: Collection of URLs used for redirection of a customer back to a partner website or as a notification endpoint. Services that should be developed and exposed by partner e-shops to allow Skip Pay to asynchronously inform these partners about important changes regarding particular applications and orders.
       properties:
         approvedRedirect:
           type: string
@@ -1719,7 +1700,7 @@ components:
           example: 'http://www.yourEshop.com/paymentRejected.html'
         notificationEndpoint:
           type: string
-          description: URL of the partner used as a notification endpoint for obtaining important updates about application (approval, rejection, storno, etc.).
+          description: 'URL of the partner used as a notification endpoint for obtaining important updates about application (approval, rejection, storno, etc.).'
           maxLength: 512
           example: 'http://www.yourEshop.com/notifications'
         paymentsEndpoint:
@@ -1728,6 +1709,7 @@ components:
           description: URL of the partner used as a notification endpoint for obtaining information about payments connected with application.
           maxLength: 512
           example: 'http://www.yourEshop.com/paymentNotification'
+          nullable: true
     OrderItemsChangeRequest:
       title: OrderItemsChangeRequest
       description: Object used to change order items.
@@ -1736,7 +1718,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/OrderItemChangeRequest'
+            $ref: '#/components/schemas/ChangeOrderItemRequestSerializer'
           description: List of changed items. All items are considered when empty.
         totalPrice:
           allOf:
@@ -1747,6 +1729,49 @@ components:
           items:
             $ref: '#/components/schemas/VatAmount'
           description: Total VAT amounts of items (from orderItems array) split by their VAT rates.
+    OrderCustomerSerializer:
+      title: OrderCustomerSerializer
+      required:
+        - email
+      type: object
+      properties:
+        titleBefore:
+          type: string
+          description: 'Academical degree, in front of the name.'
+          maxLength: 60
+          example: Ing.
+          nullable: true
+        titleAfter:
+          type: string
+          description: 'Academical degree, behind name.'
+          maxLength: 60
+          example: CSc.
+          nullable: true
+        email:
+          type: string
+          description: E-mail address of customer
+          maxLength: 254
+          example: john.newborn@country.com
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrecheckAddress'
+          description: Addresses. All types are allowed.
+        tin:
+          type: string
+          description: Tax identification number (ICO)
+          maxLength: 20
+          example: '12333321'
+          nullable: true
+        vatin:
+          type: string
+          description: VAT identification number
+          maxLength: 20
+          example: CZ8402154456
+          nullable: true
+        extraData:
+          $ref: '#/components/schemas/CustomerExtraData'
+      description: Customer data
     OrderItemsReturnRequest:
       title: OrderItemsReturnRequest
       description: Object used to mark order items as returned.
@@ -1755,10 +1780,10 @@ components:
         - type: object
           properties:
             document:
-               $ref: '#/components/schemas/DocumentRequest'
+              $ref: '#/components/schemas/DocumentRequest'
             variableSymbol:
               type: string
-              description: Variable symbol of the new document (credit note, ...). This symbols is used by Skip Pay to pair payment from e-shop.
+              description: 'Variable symbol of the new document (credit note, ...). This symbols is used by Skip Pay to pair payment from e-shop.'
               maxLength: 10
               example: '1234567890'
     OrderItemsSendRequest:
@@ -1773,12 +1798,12 @@ components:
               example: INVOICE
             variableSymbol:
               type: string
-              description: Required if was not specified earlier in ''Create application'' or ''Change application order'' operations. Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).
+              description: 'Required if was not specified earlier in ''''Create application'''' or ''''Change application order'''' operations. Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
               maxLength: 10
               example: '1234567890'
             specificSymbol:
               type: string
-              description: Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).
+              description: 'Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
               maxLength: 10
               example: '1234567890'
             sentDate:
@@ -1822,7 +1847,7 @@ components:
           type: array
           items:
             type: string
-          description: Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).
+          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
           maxLength: 10
         totalPrice:
           $ref: '#/components/schemas/Amount'
@@ -1879,27 +1904,33 @@ components:
         - $ref: '#/components/schemas/OrderBase'
         - required:
             - state
+            - deliveryDate
+            - deliveryTrackingNumber
+            - sentDate
             - items
             - merchantId
           type: object
           properties:
             state:
-              $ref: '#/components/schemas/OrderState'
+              $ref: '#/components/schemas/OrderDeliveryState'
             deliveryDate:
               type: string
               format: date
               description: Date and time of delivery
               example: '2017-01-17'
+              nullable: true
             deliveryTrackingNumber:
               type: string
               description: Delivery tracking number
               maxLength: 64
               example: EX12221
+              nullable: true
             sentDate:
               type: string
               format: date
               description: Date and time of order shipping
               example: '2017-01-12'
+              nullable: true
             documents:
               type: array
               items:
@@ -1914,6 +1945,7 @@ components:
               type: string
               description: Merchant identification
               example: ABCD1234
+              nullable: true
     OrderExtendedResponse:
       title: OrderExtendedResponse
       allOf:
@@ -1938,6 +1970,7 @@ components:
           items:
             type: string
           description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+          nullable: true
         totalPrice:
           $ref: '#/components/schemas/Amount'
         totalVat:
@@ -1994,6 +2027,7 @@ components:
           description: EAN code.
           maxLength: 64
           example: '888462064002'
+          nullable: true
         name:
           type: string
           description: Item name
@@ -2006,19 +2040,23 @@ components:
           description: Item variant
           maxLength: 250
           example: 32GB SpaceGray
+          nullable: true
         description:
           type: string
           example: Mobile phone with 32GB of RAM
+          nullable: true
         producer:
           type: string
           description: Producer name
           maxLength: 250
           example: Apple
+          nullable: true
         categories:
           type: array
           items:
             type: string
           description: List of item categories
+          nullable: true
         totalPrice:
           $ref: '#/components/schemas/Amount'
         totalVat:
@@ -2028,7 +2066,8 @@ components:
           format: url
           description: URL of the item in e-shop
           maxLength: 200
-          example: https://www.example.com
+          example: 'https://www.example.com'
+          nullable: true
       description: 'Order item base information, needed to identify order item'
     OrderItemRequest:
       title: OrderItemRequest
@@ -2055,28 +2094,34 @@ components:
         - $ref: '#/components/schemas/OrderItemBase'
         - required:
             - state
+            - sentDate
+            - deliveryDate
+            - deliveryTrackingNumber
             - unitPrice
             - unitVat
             - quantity
           type: object
           properties:
             state:
-              $ref: '#/components/schemas/OrderState'
+              $ref: '#/components/schemas/OrderDeliveryState'
             sentDate:
               type: string
               format: date
               description: Date when item was sent. Only when the whole order was NOT sent at once.
               example: '2017-01-10'
+              nullable: true
             deliveryDate:
               type: string
               format: date
               description: Date when item was delivered. Only when the whole order was NOT sent at once.
               example: '2017-01-12'
+              nullable: true
             deliveryTrackingNumber:
               type: string
               description: Tracking number for the item. Only when the whole order was NOT sent at once.
               maxLength: 64
               example: EX21121
+              nullable: true
             image:
               $ref: '#/components/schemas/FileResponse'
             unitPrice:
@@ -2088,7 +2133,7 @@ components:
               description: (positive float/decimal up to 3 decimal places) Item quantity.
               minimum: 1
               example: 1
-    OrderState:
+    OrderDeliveryState:
       title: Order State
       enum:
         - PROCESSING
@@ -2099,8 +2144,8 @@ components:
       type: string
       description: Order state.
       example: PROCESSING
-    OrderItemChangeRequest:
-      title: OrderItemChangeRequest
+    ChangeOrderItemRequestSerializer:
+      title: Change Order Item Request Serializer
       description: Order item base information
       type: object
       properties:
@@ -2109,16 +2154,19 @@ components:
           description: Internal code for item (internal to e-shop). Used to better identify the item for future changes
           maxLength: 200
           example: EXC4677-1a
+          nullable: true
         ean:
           type: string
           description: EAN code.
           maxLength: 64
           example: '888462064002'
+          nullable: true
         name:
           type: string
           description: Item name
           maxLength: 255
           example: iPhone 6s 32GB SpaceGray
+          nullable: true
         type:
           $ref: '#/components/schemas/ItemType'
         quantity:
@@ -2126,6 +2174,7 @@ components:
           description: '(positive float/decimal up to 3 decimal places) Item quantity. If empty, considered as whole item quantity is selected'
           minimum: 1
           example: 1
+          nullable: true
     Payment:
       title: Payment
       required:
@@ -2150,10 +2199,6 @@ components:
           example: 11200a0ee1
         value:
           $ref: '#/components/schemas/Amount'
-        variableSymbol:
-          type: string
-          description: Payment variable symbol
-          example: '1234567890'
         invoice:
           $ref: '#/components/schemas/InvoiceInfo'
       description: Payment information
@@ -2176,12 +2221,15 @@ components:
     PartnerLoginResult:
       title: PartnerLoginResult
       description: Authenticated partner access token
+      required:
+        - accessToken
       type: object
       properties:
         accessToken:
           type: string
           description: Access token
           example: TokenForPartnerTokenForPartnerTokenForPartnerTokenForPartner
+          nullable: true
         expiresIn:
           type: number
           description: Token validity remaining time (in seconds)
@@ -2206,7 +2254,7 @@ components:
     PrecheckCustomerRequest:
       title: PrecheckCustomerRequest
       allOf:
-        - $ref: '#/components/schemas/CustomerBase1'
+        - $ref: '#/components/schemas/OrderCustomerSerializer'
         - required:
             - phone
           type: object
@@ -2223,7 +2271,7 @@ components:
               example: Newborn
             fullName:
               type: string
-              description: Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.
+              description: 'Customer full name, including academical degrees and salutation. Required only if `firstName` or `lastName` are empty.'
               maxLength: 240
               example: 'Ing. John Newborn, Csc.'
             phone:
@@ -2244,7 +2292,23 @@ components:
         order:
           $ref: '#/components/schemas/PrecheckOrderRequest'
         type:
-          $ref: '#/components/schemas/FinancingType2'
+          title: Financing Type 2
+          description: 'Financing type, if type is not sent `DEFERRED_PAYMENT` is selected.'
+          enum:
+            - DEFERRED_PAYMENT
+            - PAY_IN_THREE
+          type: string
+          example: DEFERRED_PAYMENT
+    PrecheckResultResponseSerializer:
+      title: PrecheckResultResponseSerializer
+      enum:
+        - UNKNOWN
+        - FIRST_ORDER
+        - FULL
+        - BLOCKED
+      type: string
+      description: Customer type.
+      example: UNKNOWN
     PrecheckAddress:
       title: PrecheckAddress
       type: object
@@ -2253,44 +2317,41 @@ components:
           type: string
           description: Name on address
           example: John Doe
+          nullable: true
         country:
           type: string
           description: |-
             Country.
-
             (see [ISO 3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))
           example: CZ
+          nullable: true
         city:
           type: string
           description: City
           maxLength: 100
           example: Prague
+          nullable: true
         streetAddress:
           type: string
           description: Street/city part
           maxLength: 100
           example: Letenská
+          nullable: true
         streetNumber:
           type: string
           description: Street number
           maxLength: 50
           example: '22'
+          nullable: true
         zip:
           type: string
           description: Postal code
           maxLength: 30
           example: 140 00
+          nullable: true
         addressType:
           $ref: '#/components/schemas/AddressType'
       description: Address information for precheck validation
-    PrecheckType:
-      title: Precheck Type
-      enum:
-        - DEFERRED_PAYMENT
-        - PAY_IN_THREE
-      type: string
-      description: Precheck result type for Funding type.
-      example: PAY_IN_THREE
     PrecheckOrderItemRequest:
       title: PrecheckOrderItemRequest
       description: Order item information for precheck validation
@@ -2301,16 +2362,19 @@ components:
           description: Internal code for item (internal to e-shop). Used to better identify the item for future changes
           maxLength: 200
           example: EXC4677-1a
+          nullable: true
         ean:
           type: string
           description: EAN code
           maxLength: 64
           example: '888462064002'
+          nullable: true
         name:
           type: string
           description: Item name
           maxLength: 255
           example: iPhone 6s 32GB SpaceGray
+          nullable: true
         type:
           $ref: '#/components/schemas/ItemType'
         variant:
@@ -2318,19 +2382,23 @@ components:
           description: Item variant
           maxLength: 250
           example: 32GB SpaceGray
+          nullable: true
         description:
           type: string
           example: Mobile phone with 32GB of RAM
+          nullable: true
         producer:
           type: string
           description: Producer name
           maxLength: 250
           example: Apple
+          nullable: true
         categories:
           type: array
           items:
             type: string
           description: List of item categories
+          nullable: true
         totalPrice:
           $ref: '#/components/schemas/Amount'
         totalVat:
@@ -2340,7 +2408,8 @@ components:
           format: url
           description: URL of the item in e-shop
           maxLength: 200
-          example: https://www.example.com
+          example: 'https://www.example.com'
+          nullable: true
         unitPrice:
           $ref: '#/components/schemas/Amount'
         unitVat:
@@ -2362,7 +2431,7 @@ components:
           type: array
           items:
             type: string
-          description: Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).
+          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
           maxLength: 10
         totalPrice:
           $ref: '#/components/schemas/Amount'
@@ -2407,11 +2476,17 @@ components:
         - recommendation
         - probabilityOfApproval
         - code
-        - customerType
+        - PrecheckResultResponseSerializer
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/PrecheckType'
+          title: Precheck Type
+          enum:
+            - DEFERRED_PAYMENT
+            - PAY_IN_THREE
+          type: string
+          description: Precheck result type for Funding type.
+          example: PAY_IN_THREE
         recommendation:
           type: boolean
           description: |-
@@ -2432,9 +2507,23 @@ components:
           type: number
           description: 'Completness of the result. <0, 1> The lower is the value, the lower accuracy of the result.'
         code:
-          $ref: '#/components/schemas/Code'
-        CustomerType:
-          $ref: '#/components/schemas/CustomerType'
+          title: code
+          description: Result code.
+          enum:
+            - OK
+            - UNKNOWN
+            - NOT_AVAILABLE
+            - ADDITIONAL_DATA_SECURITY
+            - ADDITIONAL_DATA_LIMIT
+            - INSUFFICIENT_LIMIT
+            - INSUFFICIENT_LIMIT_OPPORTUNITY
+            - DETAILS_NOT_MATCHING
+            - MANUAL_VERIFICATION
+          type: string
+          example: OK
+          nullable: true
+        PrecheckResultResponseSerializer:
+          $ref: '#/components/schemas/PrecheckResultResponseSerializer'
         message:
           type: string
           description: |-
@@ -2536,41 +2625,15 @@ components:
           description: Unique identifier in Skip Pay
           example: abcd1234
         state:
-          $ref: '#/components/schemas/RecurrenceState'
-    RecurrenceState:
-      title: Recurrence State
-      enum:
-        - APPROVING
-        - READY
-        - CANCELLED
-        - EXPIRED
-      type: string
-      description: Recurrence state
-      example: APPROVING
-    ReasonState:
-      title: Reason State
-      enum:
-        - PROCESSING_REDIRECT_NEEDED
-        - PROCESSING_PREAPPROVED
-        - PROCESSING_VALIDATION_IN_PROGRESS
-        - REJECTED
-        - CANCELLED_NOT_PAID
-        - READY_TO_SHIP
-        - READY_SHIPPED
-        - READY_DELIVERED
-        - READY_PAID
-        - CANCELLED_RETURNED
-      type: string
-      description: 'Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state'
-      example: PROCESSING_REDIRECT_NEEDED
-    Severity:
-      title: Severity
-      enum:
-        - ERROR
-        - WARN
-        - INFO
-      type: string
-      example: ERROR
+          title: Recurrence State
+          enum:
+            - APPROVING
+            - READY
+            - CANCELLED
+            - EXPIRED
+          type: string
+          description: Recurrence state
+          example: APPROVING
   securitySchemes:
     httpBearer:
       type: http
