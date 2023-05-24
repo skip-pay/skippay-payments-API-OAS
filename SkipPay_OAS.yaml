@@ -1,14 +1,14 @@
 openapi: 3.0.0
 info:
   contact:
-    name: SkipPay API
+    name: Skip Pay API
     email: info@skippay.cz
     url: www.skippay.cz
   title: Skip Pay API for partners
   description: API documentation for Skip Pay partners.
   version: '1.0'
 servers:
-  - url: 'https://api.partner.mallpay.cz'
+  - url: 'https://api.partner.skippay.cz'
     variables: {}
 paths:
   /authentication/v1/partner:
