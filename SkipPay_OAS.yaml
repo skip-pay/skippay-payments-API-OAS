@@ -454,7 +454,7 @@ paths:
         | `DEFERRED_PAYMENT` | YES       |
         | `PAY_IN_THREE`     | YES       |
 
-        If you want to cancel some items after marking those items as sent or delivered, use [Mark order items as returned](#reference/application-operations/mark-order-items-as-returned) operation.
+        If you want to cancel some items after marking those items as sent or delivered, use [Mark order items as returned](https://developers.skippay.cz/docs/api/markorderitemsasreturned) operation.
 
         | Application state | Availability |
         | ---               | ---          |
@@ -853,7 +853,7 @@ paths:
         | `DEFERRED_PAYMENT` | YES       |
         | `PAY_IN_THREE`     | YES       |
 
-        It has to be called with valid access token (see the [Security section](#reference/security)) from your server. If you plan to integrate it in client flow, you should implement REST endpoint bound to your shopping basket session, that will be used as a proxy to call Skip Pay API - **NEVER put access token directly to client side**.
+        It has to be called with valid access token (see the [Security section](https://developers.skippay.cz/docs/api-reference/security)) from your server. If you plan to integrate it in client flow, you should implement REST endpoint bound to your shopping basket session, that will be used as a proxy to call Skip Pay API - **NEVER put access token directly to client side**.
 
         Possible error codes explanation:
         | Status code | Code                  | Explanation                                                                     |
@@ -1245,7 +1245,7 @@ components:
           type: array
           items:
             type: string
-          description: 'Array of all precheck ids related to this application. See [Precheck operation](#reference/precheck-operations/precheck) and it''s response (PrecheckResultsResponse).'
+          description: 'Array of all precheck ids related to this application. See [Precheck operation](htttps://developers.skippay.cz/docs/api/precheck) and it''s response (PrecheckResultsResponse).'
         merchantUrls:
           $ref: '#/components/schemas/MerchantUrls'
     ApplicationOrderChangeRequest:
