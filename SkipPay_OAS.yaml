@@ -1348,7 +1348,11 @@ components:
       description: 'Delivery type, for `DELIVERY_CARRIER` type can be further specified by `deliveryCarrier` attribute.'
       example: DELIVERY_CARRIER
     DeliveryCarrier:
-      title: deliverycarrier
+      oneOf:
+        - $ref: '#/components/schemas/DeliveryCarrierDefault'
+        - $ref: '#/components/schemas/DeliveryCarrierCustom'
+    DeliveryCarrierDefault:
+      title: Delivery Carrier Default 
       enum:
         - CZ_POST_HAND
         - CZ_POST_OFFICE
@@ -1367,6 +1371,10 @@ components:
         - MALL_DEPOSIT
       type: string
       example: DPD
+    DeliveryCarrierCustom:
+      type: string
+      maximum: 250
+      description: For carriers not found in enumeration of customer ID, specify value as text.     
     DocumentSerializer:
       title: Document Serializer
       description: Type of the document
