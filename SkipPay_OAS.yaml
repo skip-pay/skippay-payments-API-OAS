@@ -897,112 +897,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
-  '/financing/v1/{application.merchantUrls.notificationEndpoint}':
-    post:
-      tags:
-        - Merchantsite operations
-      summary: Application notification
-      description: |-
-        We use this resource when there is need to let you know about important changes within particular *application*. Namely in following situations:
-
-        | Financing type     | Supported |
-        | ---                | ---       |
-        | `DEFERRED_PAYMENT` | YES       |
-        | `PAY_IN_THREE`     | YES       |
-
-        > IMPORTANT NOTE: This service should be developed and exposed by partner e-shops to allow Skip Pay to asynchronously inform these partners about important changes regarding particular applications.
-
-        | Trigger                                                             | Corresponding Application.stateReason | Expected reaction                                                                        |
-        | ---                                                                 | ---                                   | ---                                                                                      |
-        | Application was rejected                                            | `REJECTED`                            | You should probably cancel respective order and release reserved goods                   |
-        | Application was cancelled                                           | `CANCELLED_NOT_PAID`                  | You should probably cancel respective order and release reserved goods                   |
-        | Order to dispatch (we commit to finance customer's order)           | `READY_TO_SHIP`                       | Dispatch the order to the customer                                                       |
-        | Order dispatched                                                    | `READY_SHIPPED`                       | None - serves as an acknowledgment (partner should know about this change)               |
-        | Order delivered                                                     | `READY_DELIVERED`                     | None - serves as an acknowledgment (partner should know about this change)               |
-        | Application was paid to the partner                                 | `READY_PAID`                          | Financial compensation for the application has been processed - check your bank account  |
-
-        > NOTE: READY_PAID state is set when at least part of the application price was paid to the partner, not necessarily full application price. This also applies to the `Application was paid to the partner` application notification trigger.
-
-        We fill the request with following information:
-
-        - Application unique ID
-
-        - Application state
-
-        - Application substate
-
-        > IMPORTANT: You should always double check the state of Application on `/financing/v1/applications/{applicationId}` resource due to security reasons.
-
-        If notification is not processed due to error or unavailability it is automatically sent again (retried) after 1, 5, 5, 5 a 5 minutes by default (5 tries in total).Notify partner about changes in application.
-      operationId: Applicationnotification
-      parameters:
-        - name: application.merchantUrls.notificationEndpoint
-          in: path
-          description: application.merchantUrls.notificationEndpoint
-          required: true
-          style: simple
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json; charset=utf-8:
-            schema:
-              $ref: '#/components/schemas/ApplicationBaseResponse'
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json; charset=utf-8:
-              schema:
-                $ref: '#/components/schemas/Applicationnotificationresponse'
-        '400':
-          description: Can not process changes
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-                example: Can not process changes
-      deprecated: false
-  '/financing/v1/{application.merchantUrls.paymentEndpoint}':
-    post:
-      tags:
-        - Merchantsite operations
-      summary: Payment notification
-      description: |-
-        | Financing type     | Supported |
-        | ---                | ---       |
-        | `DEFERRED_PAYMENT` | YES       |
-        | `PAY_IN_THREE`     | YES       |Notification about new payment.
-      operationId: Paymentnotification
-      parameters:
-        - name: application.merchantUrls.paymentEndpoint
-          in: path
-          description: application.merchantUrls.paymentEndpoint
-          required: true
-          style: simple
-          schema:
-            type: string
-      requestBody:
-        description: ''
-        content:
-          application/json; charset=utf-8:
-            schema:
-              $ref: '#/components/schemas/Payment'
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json; charset=utf-8:
-              schema:
-                $ref: '#/components/schemas/Paymentnotificationresponse'
-        '400':
-          description: ''
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-                example: Can not process changes
-      deprecated: false
   /v1/health:
     get:
       tags:
@@ -1273,16 +1167,6 @@ components:
           nullable: true
         order:
           $ref: '#/components/schemas/OrderChangeRequest'
-    Applicationnotificationresponse:
-      title: Applicationnotificationresponse
-      required:
-        - status
-      type: object
-      properties:
-        status:
-          type: string
-      example:
-        status: OK
     CustomerBase:
       title: CustomerBase
       required:
@@ -2587,15 +2471,6 @@ components:
           type: string
           description: 'Request to retrieve previous page, if it exists and can be unambiguously specified'
           example: transactions?sort=category&limit=10&before=25
-    Paymentnotificationresponse:
-      title: Paymentnotificationresponse
-      required:
-        - status
-      type: object
-      properties:
-        status:
-          type: string
-          example: OK
     RecurrenceUpdateRequest:
       title: RecurrenceUpdateRequest
       required:
