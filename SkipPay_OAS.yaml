@@ -3,7 +3,7 @@ info:
   contact:
     name: Skip Pay API
     email: info@skippay.cz
-    url: www.skippay.cz
+    url: https://www.skippay.cz
   title: Skip Pay API for partners
   description: API documentation for Skip Pay partners.
   version: '1.0'
@@ -21,7 +21,7 @@ paths:
       parameters: []
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/PartnerLogin'
         required: true
@@ -29,13 +29,13 @@ paths:
         '200':
           description: Partner acces token issued
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/PartnerLoginResult'
         '400':
           description: Unable to authenticate partner
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -119,26 +119,26 @@ paths:
       operationId: Createapplication
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/ApplicationRequest'
       responses:
         '200':
           description: Application data is duplicate. Existing application is returned.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationResponse'
         '201':
           description: Application was created
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationResponse'
         '400':
           description: There was an error processing request
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -178,13 +178,13 @@ paths:
         '200':
           description: Actual application data
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationResponse'
         '404':
           description: Application does not exist
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -211,32 +211,32 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/ApplicationWithoutCustomerRequest'
       responses:
         '201':
           description: Application was created
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationResponse'
         '400':
           description: There was an error processing request
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
         '404':
           description: There is no recurrence
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
         '422':
           description: Recurrence could not be used or invalid input data
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -265,13 +265,13 @@ paths:
         '200':
           description: Actual recurrence data
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/RecurrenceObject'
         '404':
           description: There is no recurrence
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -297,26 +297,26 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/RecurrenceUpdateRequest'
       responses:
         '200':
           description: Recurrence was updated
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/RecurrenceObject'
         '404':
           description: There is no recurrence
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
         '422':
           description: Recurrence can not be updated
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -366,20 +366,20 @@ paths:
             example: 11b00a1ef1
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/ApplicationCancelRequest'
       responses:
         '200':
           description: Application was cancelled
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationResponse'
         '422':
           description: Application can not be cancelled
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -428,20 +428,20 @@ paths:
             example: 11b00a1ef1
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/ApplicationOrderChangeRequest'
       responses:
         '200':
           description: Order was changed
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/OrderExtendedResponse'
         '422':
           description: Order can not be changed.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -498,20 +498,20 @@ paths:
             example: 11b00a1ef1
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/OrderItemsChangeRequest'
       responses:
         '200':
           description: Some order items or the whole order was cancelled
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/OrderExtendedResponse'
         '422':
           description: Order items can not be canceled.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -568,20 +568,20 @@ paths:
             example: 11b00a1ef1
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/OrderItemsSendRequest'
       responses:
         '200':
           description: Order items or whole order is marked as shipped
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/OrderExtendedResponse'
         '422':
           description: State change can not be processed
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -638,20 +638,20 @@ paths:
             example: 11b00a1ef1
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/OrderItemsDeliverRequest'
       responses:
         '200':
           description: Order items or whole order is marked as delivered
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/OrderExtendedResponse'
         '422':
           description: State change can not be processed
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -709,20 +709,20 @@ paths:
             example: 11b00a1ef1
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/OrderItemsReturnRequest'
       responses:
         '200':
           description: Order items or whole order is marked as returned
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/OrderExtendedResponse'
         '422':
           description: State change can not be processed
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -759,13 +759,13 @@ paths:
         '200':
           description: List of payments. May be empty if no payment was processed yet.
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/Getpaymentsonspecificapplicationresponse'
         '404':
           description: Application does not exist
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -837,13 +837,13 @@ paths:
         '200':
           description: Order data
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/OrderExtendedResponse'
         '404':
           description: Order not found
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -874,26 +874,26 @@ paths:
       parameters: []
       requestBody:
         content:
-          application/json; charset=utf-8:
+          application/json:
             schema:
               $ref: '#/components/schemas/PrecheckRequest'
       responses:
         '200':
           description: Probability of approval
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/PrecheckResultsResponse'
         '400':
           description: Error in processing request
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
         '422':
           description: Error in processing request
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ErrorsResponse'
       deprecated: false
@@ -928,7 +928,7 @@ paths:
         '200':
           description: ''
           content:
-            application/json; charset=utf-8:
+            application/json:
               schema:
                 $ref: '#/components/schemas/HealthCheckResponse'
         '503':
