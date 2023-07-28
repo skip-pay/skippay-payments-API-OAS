@@ -16,7 +16,7 @@ paths:
       tags:
         - Security
       summary: Login partner
-      description: Partner authenticate himself and obtain access token
+      description: Partner authenticate himself and obtain access token. More info about [security and login endpoint](https://developers.skippay.cz/docs/api-reference/security)
       operationId: Loginpartner
       parameters: []
       requestBody:
@@ -27,7 +27,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Partner acces token issued
+          description: Partner access token issued
           content:
             application/json; charset=utf-8:
               schema:
