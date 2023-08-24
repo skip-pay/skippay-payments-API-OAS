@@ -1,0 +1,19 @@
+name: Trigger Developers portal pipeline
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  trigger-gitlab-pipeline:
+    name: Trigger GitLab pipeline
+    environment: Production
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl --request POST \
+               --fail \
+               --silent \
+               --output /dev/null \
+               --form token=${{ secrets.DEVELOPERS_PORTAL_PIPELINE_TRIGGER_TOKEN }} \
+               --form ref=master \
+               https://gitlab.com/api/v4/projects/47114892/trigger/pipeline
