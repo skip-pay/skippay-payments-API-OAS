@@ -1349,10 +1349,13 @@ components:
       example: DELIVERY_CARRIER
     DeliveryCarrier:
       oneOf:
-        - $ref: '#/components/schemas/DeliveryCarrierDefault'
-        - $ref: '#/components/schemas/DeliveryCarrierCustom'
-    DeliveryCarrierDefault:
-      title: Delivery Carrier Default 
+        - $ref: '#/components/schemas/carrierId'
+        - $ref: '#/components/schemas/carrierCustom'
+      required:
+        - carrierId 
+        - carrierCustom
+    carrierId:
+      title: carrierId
       enum:
         - CZ_POST_HAND
         - CZ_POST_OFFICE
@@ -1371,7 +1374,8 @@ components:
         - MALL_DEPOSIT
       type: string
       example: DPD
-    DeliveryCarrierCustom:
+    carrierCustom:
+      title: carrierCustom
       type: string
       maximum: 250
       description: For carriers not found in enumeration of customer ID, specify value as text.     
