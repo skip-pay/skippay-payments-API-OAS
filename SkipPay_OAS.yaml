@@ -1434,7 +1434,7 @@ components:
       properties:
         variableSymbol:
           type: string
-          description: 'Variable symbol of this document (proforma, invoice, ...)'
+          description: 'Variable symbol of this document (proforma, invoice, ...). This string must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
           example: '1234567890'
           nullable: true
     ErrorsResponse:
@@ -1688,7 +1688,7 @@ components:
               $ref: '#/components/schemas/DocumentRequest'
             variableSymbol:
               type: string
-              description: 'Variable symbol of the new document (credit note, ...). This symbols is used by Skip Pay to pair payment from e-shop.'
+              description: 'Variable symbol of the new document (credit note, ...). This symbols is used by Skip Pay to pair payment from e-shop. This string must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
               maxLength: 10
               example: '1234567890'
     OrderItemsSendRequest:
@@ -1703,12 +1703,12 @@ components:
               example: INVOICE
             variableSymbol:
               type: string
-              description: 'Required if was not specified earlier in ''''Create application'''' or ''''Change application order'''' operations. Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
+              description: 'Required if was not specified earlier in ''''Create application'''' or ''''Change application order'''' operations. Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
               maxLength: 10
               example: '1234567890'
             specificSymbol:
               type: string
-              description: 'Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
+              description: 'Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
               maxLength: 10
               example: '1234567890'
             sentDate:
@@ -1752,7 +1752,7 @@ components:
           type: array
           items:
             type: string
-          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
           maxLength: 10
         totalPrice:
           $ref: '#/components/schemas/Amount'
@@ -1874,7 +1874,7 @@ components:
           type: array
           items:
             type: string
-          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
           nullable: true
         totalPrice:
           $ref: '#/components/schemas/Amount'
@@ -2336,7 +2336,7 @@ components:
           type: array
           items:
             type: string
-          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits).'
+          description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
           maxLength: 10
         totalPrice:
           $ref: '#/components/schemas/Amount'
