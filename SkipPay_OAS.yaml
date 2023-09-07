@@ -1708,7 +1708,7 @@ components:
               example: '1234567890'
             specificSymbol:
               type: string
-              description: 'Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
+              description: 'Symbol used for making the payment to your account. This string must contain only numbers, maximum length is 10 characters (digits).'
               maxLength: 10
               example: '1234567890'
             sentDate:
