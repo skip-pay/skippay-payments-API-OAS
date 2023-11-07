@@ -453,12 +453,14 @@ paths:
       description: |-
         When some or all order items were cancelled (won't be ever delivered), use `/financing/v1/applications/{applicationId}/order/cancel` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
 
+        > ⚠️ If you want to cancel some items after marking those items as sent or delivered, use [Mark order items as returned](https://developers.skippay.cz/docs/api/markorderitemsasreturned) operation.
+        
+        > 📘 For additional examples and more information, please refer to the [Technical guide: Manage your orders](https://developers.skippay.cz/docs/guides/technical-guides/manage-your-orders).
+
         | Financing type     | Supported |
         | ---                | ---       |
         | `DEFERRED_PAYMENT` | YES       |
         | `PAY_IN_THREE`     | YES       |
-
-        If you want to cancel some items after marking those items as sent or delivered, use [Mark order items as returned](https://developers.skippay.cz/docs/api/markorderitemsasreturned) operation.
 
         | Application state | Availability |
         | ---               | ---          |
@@ -471,9 +473,9 @@ paths:
 
         If you want to cancel specific order item/s, use `/financing/v1/applications/{applicationId}/order/cancel` resource with properly filled request that contains cancelled order items info. In this case request should contain array of cancelled order items with one or more particular order item identificators (`code`/`EAN`/`name`/`type`) - `code`, `ean`, `name` and `type` is used for identifying order item sent in `Create application`.
 
-        > TIP: Use an empty request if marking last (those not yet not marked) item(s) on order as cancelled.
+        > 💡 **TIP**: Use an empty request if marking last (those not yet not marked) item(s) on order as cancelled.
 
-        > **ATTENTION:** If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
+        > ⚠️ If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
 
         If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
 
@@ -523,6 +525,8 @@ paths:
       description: |-
         When some or all order items were shipped to the customer, use `/financing/v1/applications/{applicationId}/order/send` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
 
+        > 📘 For additional examples and more information, please refer to the [Technical guide: Manage your orders](https://developers.skippay.cz/docs/guides/technical-guides/manage-your-orders).
+
         | Financing type     | Supported |
         | ---                | ---       |
         | `DEFERRED_PAYMENT` | YES       |
@@ -539,9 +543,9 @@ paths:
 
         If you want to mark specific order item/s as sent, use `/financing/v1/applications/{applicationId}/order/send` resource with properly filled request that contains sent order items info. In this case request should contain array of sent order items with one or more particular order item identificators (`code`/`EAN`/`name`/`type`) - `code`, `ean`, `name` and `type` is used for identifying order item sent in `Create application`.
 
-        > TIP: Use an empty request if marking last (those not yet not marked) item(s) on order as sent.
+        > 💡 **TIP**: Use an empty request if marking last (those not yet not marked) item(s) on order as sent.
 
-        > **ATTENTION:** If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
+        > ⚠️ If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
 
         If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
 
@@ -592,6 +596,8 @@ paths:
       summary: Mark order items as delivered
       description: |-
         When some or all order items were delivered to the customer, use `/financing/v1/applications/{applicationId}/order/deliver` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+        
+        > 📘 For additional examples and more information, please refer to the [Technical guide: Manage your orders](https://developers.skippay.cz/docs/guides/technical-guides/manage-your-orders).
 
         | Financing type     | Supported |
         | ---                | ---       |
@@ -609,9 +615,9 @@ paths:
 
         If you want to mark specific order item/s as delivered, use `/financing/v1/applications/{applicationId}/order/deliver` resource with properly filled request that contains delivered order items info. In this case request should contain array of delivered order items with one or more particular order item identificators (`code`/`EAN`/`name`/`type`) - `code`, `ean`, `name` and `type` is used for identifying order item sent in `Create application`.
 
-        > TIP: Use an empty request if marking last (those not yet not marked) item(s) on order as delivered.
+        > 💡 **TIP**: Use an empty request if marking last (those not yet not marked) item(s) on order as delivered.
 
-        > **ATTENTION:** If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
+        > ⚠️ If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
 
         If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
 
@@ -662,13 +668,15 @@ paths:
       summary: Mark order items as returned
       description: |-
         When some or all order items were returned by the customer to you (after delivery), use `/financing/v1/applications/{applicationId}/order/return` resource where `{applicationId}` is the application ID you received in the response of `/financing/v1/applications` after its creation.
+        
+        If you want to cancel some items before marking those items as sent or delivered, use [Mark order items as cancelled](#reference/application-operations/mark-order-items-as-cancelled) operation.
+        
+        > 📘 For additional examples and more information, please refer to the [Technical guide: Manage your orders](https://developers.skippay.cz/docs/guides/technical-guides/manage-your-orders).
 
         | Financing type     | Supported |
         | ---                | ---       |
         | `DEFERRED_PAYMENT` | YES       |
         | `PAY_IN_THREE`     | YES       |
-
-        If you want to cancel some items before marking those items as sent or delivered, use [Mark order items as cancelled](#reference/application-operations/mark-order-items-as-cancelled) operation.
 
         | Application state | Availability |
         | ---               | ---          |
@@ -681,9 +689,11 @@ paths:
 
         If you want to mark specific order item/s as returned, use `/financing/v1/applications/{applicationId}/order/return` resource with properly filled request that contains returned order items info. In this case request should contain array of returned order items with one or more particular order item identificators (`code`/`EAN`/`name`/`type`) - `code`, `ean`, `name` and `type` is used for identifying order item sent in `Create application`.
 
-        > TIP: Use an empty request if marking last (those not yet not marked) item(s) on order as returned.
+        > 💡 **TIP**: Optionally, you can specify the amount (in the field `totalPrice`) that should be returned if it differs from the sum of the items' prices.
 
-        > **ATTENTION:** If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
+        > 💡 **TIP**: Use an empty request if marking last (those not yet not marked) item(s) on order as returned.
+
+        > ⚠️ If multiple properties (`code`, `ean`, `name` or `type`) are used for identifying some order item, it all must exact match the item data.
 
         If the request was successfully processed, you receive HTTP status code 200 and object of information about changed *order* plus basic information about respective *application* (ID, state, substate).
 
@@ -1628,12 +1638,12 @@ components:
         totalPrice:
           allOf:
             - $ref: '#/components/schemas/Amount'
-            - description: Financial amount
+            - description: The total financial amount of items (from the `orderItems` array). You can specify the amount if it differs from the sum of the item prices. If this amount is not specified, `application.order.totalPrice` is used.
         totalVat:
           type: array
           items:
             $ref: '#/components/schemas/VatAmount'
-          description: Total VAT amounts of items (from orderItems array) split by their VAT rates.
+          description: Total VAT amounts of items (from `orderItems` array) split by their VAT rates.
     OrderCustomerSerializer:
       title: OrderCustomerSerializer
       required:
