@@ -1636,9 +1636,8 @@ components:
             $ref: '#/components/schemas/ChangeOrderItemRequestSerializer'
           description: List of changed items. All items are considered when empty.
         totalPrice:
-          allOf:
-            - $ref: '#/components/schemas/Amount'
-            - description: The total financial amount of items (from the `orderItems` array). You can specify the amount if it differs from the sum of the item prices. If this amount is not specified, `application.order.totalPrice` is used.
+          $ref: '#/components/schemas/Amount'
+          description: The total financial amount of items (from the `orderItems` array). You can specify the amount if it differs from the sum of the item prices. If this amount is not specified, `application.order.totalPrice` is used.
         totalVat:
           type: array
           items:
