@@ -1364,6 +1364,18 @@ components:
       required:
         - carrierId 
         - carrierCustom
+    channel:
+      title: channel
+      enum:
+        - ESHOP
+        - BRANCH
+        - FRANCHISE
+        - TELEPHONE
+        - INTERNAL
+      type: string
+      description: 'Sales channel, indicates how or where the order is created. (ie. via e-mail, eshop or at a branch)'
+      example: BRANCH
+      default: ESHOP
     carrierId:
       title: carrierId
       enum:
@@ -1779,6 +1791,8 @@ components:
           $ref: '#/components/schemas/DeliveryType'
         deliveryCarrier:
           $ref: '#/components/schemas/DeliveryCarrier'
+        channel:
+          $ref: '#/components/schemas/channel'
         reservationDate:
           type: string
           format: datetime
@@ -1901,6 +1915,8 @@ components:
           $ref: '#/components/schemas/DeliveryType'
         deliveryCarrier:
           $ref: '#/components/schemas/DeliveryCarrier'
+        channel:
+          $ref: '#/components/schemas/channel'
         reservationDate:
           type: string
           format: datetime
