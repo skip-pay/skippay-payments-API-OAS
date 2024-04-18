@@ -1359,11 +1359,8 @@ components:
       example: DELIVERY_CARRIER
     DeliveryCarrier:
       oneOf:
-        - $ref: '#/components/schemas/carrierId'
-        - $ref: '#/components/schemas/carrierCustom'
-      required:
-        - carrierId 
-        - carrierCustom
+        - $ref: '#/components/schemas/DeliveryCarrierPredefined'
+        - $ref: '#/components/schemas/DeliveryCarrierCustom'
     channel:
       title: channel
       enum:
@@ -1376,31 +1373,67 @@ components:
       description: 'Sales channel, indicates how or where the order is created. (ie. via e-mail, eshop or at a branch)'
       example: BRANCH
       default: ESHOP
-    carrierId:
-      title: carrierId
-      enum:
-        - CZ_POST_HAND
-        - CZ_POST_OFFICE
-        - CZ_POST_OTHER
-        - PPL
-        - DPD
-        - GEIS
-        - IN_TIME
-        - TOP_TRANS
-        - GEBRUDER_WEISS
-        - LOCAL_COURIER
-        - TNT
-        - GLS
-        - HDS_COMFORT
-        - HDS_STANDARD
-        - MALL_DEPOSIT
-      type: string
-      example: DPD
-    carrierCustom:
-      title: carrierCustom
-      type: string
-      maximum: 250
-      description: For carriers not found in enumeration of customer ID, specify value as text.     
+    DeliveryCarrierPredefined:
+      type: object
+      properties:
+        carrierId:
+          title: carrierId
+          enum:
+            - AIRWAY
+            - CZ_POST_HAND
+            - CZ_POST_OFFICE
+            - CZ_POST_OTHER
+            - DACHSER
+            - DB_SCHENKER
+            - DEUTSCHE_POST_DHL
+            - DHL
+            - DHL_EXPRESS
+            - DHL_FREIGHT
+            - DPD
+            - DSV
+            - FEDEX
+            - FOFR
+            - GEBRUDER_WEISS
+            - GEIS
+            - GLS
+            - HDS_COMFORT
+            - HDS_STANDARD
+            - IN_TIME
+            - JAPO_TRANSPORT
+            - LIFTAGO
+            - LOCAL_COURIER
+            - MAGYAR_POSTA
+            - MALL_DELIVERY
+            - MALL_DEPOSIT
+            - MESSENGER
+            - POSTA_BEZ_HRANIC
+            - PPL
+            - PPL_PARCEL_CONNECT
+            - RABEN
+            - SAMEDAY
+            - SDS
+            - SLOVAK_PARCEL_SERVICE
+            - SLOVENSKA_POSTA
+            - SPRING_GDS
+            - TNT
+            - TOP_TRANS
+            - UPS
+            - WEDO
+            - WEDO_ULOZENKA
+            - ZASILKOVNA
+          type: string
+          example: DPD
+      required:
+        - carrierId
+    DeliveryCarrierCustom:
+      properties:
+        carrierCustom:
+          title: carrierCustom
+          type: string
+          maximum: 250
+          description: For carriers not found in the enumeration of carrierId, specify the value as text.
+      required:
+        - carrierCustom
     DocumentSerializer:
       title: Document Serializer
       description: Type of the document
