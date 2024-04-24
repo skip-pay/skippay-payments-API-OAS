@@ -1028,7 +1028,7 @@ components:
           example: 12590
         currency:
           type: string
-          description: 'Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) (only CZK value is allowed)'
+          description: 'Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) (only CZK and EUR values are allowed)'
           example: CZK
       description: Financial amount
     ApplicationBaseResponse:
