@@ -1310,13 +1310,13 @@ components:
         latestTransactionDate:
           type: string
           format: date
-          description: Date of customer's newest transaction on partner e-shop.
+          description: Date of customer's latest (newest) transaction on partner e-shop.
           example: '2024-05-15'
           nullable: true
         earliestTransactionDate:
           type: string
           format: date
-          description: Date of customer's newest transaction on partner e-shop.
+          description: Date of customer's earliest (oldest) transaction on partner e-shop.
           example: '2015-10-12'
         pageTotalTime:
           type: number
