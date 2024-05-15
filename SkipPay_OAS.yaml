@@ -1181,6 +1181,7 @@ components:
       title: CustomerBase
       required:
         - email
+        - extraData
       type: object
       properties:
         titleBefore:
@@ -1286,36 +1287,37 @@ components:
               example: '+420123456789'
     CustomerExtraData:
       title: CustomerExtraData
+      required:
+        - transactionsNumber
+        - transactionsSum
+        - earliestTransactionDate
       type: object
       properties:
         transactionsNumber:
           type: number
-          description: Historical count of customer's cash transactions made in partner's e-shop
-          minimum: 1
+          description: Historical count of customer transactions made in partner's e-shop
           example: 10
-          nullable: true
         cashlessTransactionsNumber:
           type: number
-          description: Historical count of customer's cashless transactions made in partner's e-shop
-          minimum: 1
+          description: Historical count of customer cashless transactions made in partner's e-shop
           example: 5
-          nullable: true
         transactionsSum:
           $ref: '#/components/schemas/Amount'
+          description: Historical sum of customer transactions made in partner's e-shop
         cashlessTransactionsSum:
           $ref: '#/components/schemas/Amount'
+          description: Historical sum of customer cashless transactions made in partner's e-shop
         latestTransactionDate:
           type: string
           format: date
-          description: Newest transaction date on partner e-shop.
-          example: '2017-01-10'
+          description: Date of customer's newest transaction on partner e-shop.
+          example: '2024-05-15'
           nullable: true
         earliestTransactionDate:
           type: string
           format: date
-          description: Oldest transaction date on partner e-shop
+          description: Date of customer's newest transaction on partner e-shop.
           example: '2015-10-12'
-          nullable: true
         pageTotalTime:
           type: number
           description: Total time spent on partners website (in seconds)
