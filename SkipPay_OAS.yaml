@@ -1683,8 +1683,9 @@ components:
             $ref: '#/components/schemas/ChangeOrderItemRequestSerializer'
           description: List of changed items. All items are considered when empty.
         totalPrice:
-          $ref: '#/components/schemas/Amount'
           description: The total financial amount of items (from the `orderItems` array). You can specify the amount if it differs from the sum of the item prices. If this amount is not specified, `application.order.totalPrice` is used.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
         totalVat:
           type: array
           items:
@@ -1811,7 +1812,9 @@ components:
           description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
           maxLength: 10
         totalPrice:
-          $ref: '#/components/schemas/Amount'
+          description: Order total price including VAT.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
         totalVat:
           type: array
           items:
@@ -1935,7 +1938,9 @@ components:
           description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
           nullable: true
         totalPrice:
-          $ref: '#/components/schemas/Amount'
+          description: New order total price including VAT.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
         totalVat:
           type: array
           items:
@@ -2022,10 +2027,14 @@ components:
             type: string
           description: List of item categories
           nullable: true
-        totalPrice:
-          $ref: '#/components/schemas/Amount'
+        totalPrice:        
+          description: Order items total price including VAT.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
         totalVat:
-          $ref: '#/components/schemas/VatAmount'
+          description: Order items VAT including VAT rate.
+          allOf:
+            - $ref: '#/components/schemas/VatAmount'
         productUrl:
           type: string
           format: url
@@ -2043,7 +2052,9 @@ components:
             image:
               $ref: '#/components/schemas/FileRequest'
             unitPrice:
-              $ref: '#/components/schemas/Amount'
+              description: Order unit item price including VAT.
+              allOf:
+                - $ref: '#/components/schemas/Amount'
             unitVat:
               $ref: '#/components/schemas/VatAmount'
             quantity:
@@ -2090,7 +2101,9 @@ components:
             image:
               $ref: '#/components/schemas/FileResponse'
             unitPrice:
-              $ref: '#/components/schemas/Amount'
+              description: Order unit item price including VAT.
+              allOf:
+                - $ref: '#/components/schemas/Amount'
             unitVat:
               $ref: '#/components/schemas/VatAmount'
             quantity:
@@ -2365,7 +2378,9 @@ components:
           description: List of item categories
           nullable: true
         totalPrice:
-          $ref: '#/components/schemas/Amount'
+          description: Order item total price including VAT.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
         totalVat:
           $ref: '#/components/schemas/VatAmount'
         productUrl:
@@ -2376,7 +2391,9 @@ components:
           example: 'https://www.example.com'
           nullable: true
         unitPrice:
-          $ref: '#/components/schemas/Amount'
+            description: Order unit item price including VAT.
+            allOf:
+              - $ref: '#/components/schemas/Amount'
         unitVat:
           $ref: '#/components/schemas/VatAmount'
         quantity:
@@ -2399,7 +2416,9 @@ components:
           description: 'Variable symbols for pairing. First symbol in array is used for making the payment to your account (if not specified later in `Mark order items as sent` or `Mark order items as delivered`) or we expect you make payment on our account with this symbol (if not specified later in `Mark order items as returned` operation). Strings must contain only numbers, maximum length is 10 characters (digits). Leading zeros are ignored.'
           maxLength: 10
         totalPrice:
-          $ref: '#/components/schemas/Amount'
+          description: Order total price including VAT.
+          allOf:
+            - $ref: '#/components/schemas/Amount'
         totalVat:
           type: array
           items:
